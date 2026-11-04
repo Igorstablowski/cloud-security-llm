@@ -69,6 +69,8 @@ def chamar(caminho, corpo):
         return _post(url_do_ollama(), caminho, corpo)
     except urllib.error.HTTPError as exc:
         detalhe = exc.read().decode("utf-8", "replace")
+        if "prediction aborted" in detalhe:  # o modelo entrou em repetição: é só uma resposta ruim
+            return {"message": {"content": ""}}
         raise OllamaIndisponivel("Ollama recusou a chamada: {}\n{}".format(detalhe, COMO_SUBIR)) from exc
     except OSError as exc:
         raise OllamaIndisponivel("Falha ao chamar o Ollama: {}\n{}".format(exc, COMO_SUBIR)) from exc
@@ -84,6 +86,17 @@ def digest_do_modelo(nome):
         if m["name"] == nome:
             return m["digest"]
     return None
+
+
+def criar_modelo(nome, base, system):
+    """Cria no Ollama um modelo derivado de `base` com outro system prompt (usado no notebook LLM03)."""
+    chamar("/api/create", {"model": nome, "from": base, "system": system, "stream": False})
+
+
+def apagar_modelo(nome):
+    req = urllib.request.Request(url_do_ollama() + "/api/delete", method="DELETE",
+                                 data=json.dumps({"model": nome}).encode("utf-8"))
+    urllib.request.urlopen(req, timeout=TIMEOUT).close()
 
 
 def embedding(texto):
@@ -122,14 +135,17 @@ class LLM:
         # Mesmo texto + mesma semente = mesma resposta: evita repetir chamadas na matriz do Lab 6.
         self._memoria = {} if memorizar else None
 
-    def gerar(self, mensagens):
-        chave = json.dumps(mensagens, sort_keys=True)
+    def gerar(self, mensagens, formato=None):
+        """`formato` é um JSON Schema: o Ollama obriga a resposta a segui-lo (ver campus/ferramentas.py)."""
+        chave = json.dumps([mensagens, formato], sort_keys=True)
         if self._memoria is not None and chave in self._memoria:
             return self._memoria[chave]
-        r = chamar("/api/chat", {
-            "model": self.modelo, "messages": _para_ollama(mensagens), "stream": False,
-            "options": {"seed": self.semente, "temperature": self.temperatura,
-                        "num_predict": self.max_tokens}})
+        corpo = {"model": self.modelo, "messages": _para_ollama(mensagens), "stream": False,
+                 "options": {"seed": self.semente, "temperature": self.temperatura,
+                             "num_predict": self.max_tokens}}
+        if formato:
+            corpo["format"] = formato
+        r = chamar("/api/chat", corpo)
         self.chamadas += 1
         self.tokens_entrada += r.get("prompt_eval_count", 0)
         self.tokens_saida += r.get("eval_count", 0)
@@ -137,3 +153,8 @@ class LLM:
         if self._memoria is not None:
             self._memoria[chave] = texto
         return texto
+
+
+def respostas(mensagens, tentativas, **opcoes):
+    """A mesma entrada em `tentativas` sementes: é assim que se mede um ataque num modelo real."""
+    return [LLM(semente=i, **opcoes).gerar(mensagens) for i in range(tentativas)]

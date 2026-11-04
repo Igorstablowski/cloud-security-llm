@@ -1,4 +1,4 @@
-"""Defesas aplicadas AO REDOR do modelo (o SimLLM não tem nenhuma lógica de defesa própria).
+"""Defesas aplicadas AO REDOR do modelo: nenhuma delas depende de o modelo cooperar.
 
 Cada função é simples de propósito: o objetivo é mostrar o mecanismo, não oferecer um produto.
 Nenhuma delas é suficiente sozinha (ver laboratório 6, "queijo suíço").
@@ -11,6 +11,8 @@ from campus import dados
 
 DOMINIOS_PERMITIDOS = ("aurora.example",)
 PACOTES_PERMITIDOS = ("pandas", "numpy", "scipy", "matplotlib")
+# Biblioteca padrão: não vem de um repositório externo, então não entra na lista de aprovação.
+_PADRAO = ("csv", "json", "os", "sys", "re", "math", "datetime", "pathlib", "collections", "statistics")
 
 
 def _fold(txt):
@@ -110,8 +112,8 @@ def montar_ingenuo(system, pergunta, documentos):
 
 
 def montar_separado(system, pergunta, documentos, origem="documento"):
-    """Papéis separados + dado sanitizado e delimitado. Atenção: a separação/delimitação ajuda
-    modelos reais só em parte; no simulador quem produz efeito é a sanitização."""
+    """Papéis separados + dado sanitizado e delimitado. A separação e a delimitação ajudam só em
+    parte: o modelo ainda lê tudo como um texto só. Quem remove a instrução é a sanitização."""
     achados = []
     msgs = [{"role": "system", "content": system}]
     for d in documentos:  # documentos primeiro, pergunta por último
@@ -151,6 +153,15 @@ def redigir_pii(texto):
     return texto, cont
 
 
+def vazou_gabarito(texto, minimo=3):
+    """Quantos pares questão-resposta do gabarito aparecem no texto, em qualquer formato
+    ("1-B", "Questão 1: B"). Um par só pode ser coincidência; a partir de `minimo` é vazamento."""
+    pares = re.findall(r"(\d)-([A-E])", dados.MATERIAL_RESTRITO)
+    certos = sum(1 for q, r in pares
+                 if re.search(r"\b{}\b[^\w\n]*(?:\w+\s){{0,5}}?[^\w\n]*{}\b".format(q, r), texto))
+    return certos >= minimo
+
+
 def redigir_segredos(texto):
     return _RE_SEGREDO.sub("[SEGREDO-REDIGIDO]", texto)
 
@@ -180,22 +191,24 @@ def nome_arquivo_seguro(nome):
     return bool(re.fullmatch(r"[A-Za-z0-9_-]{1,40}", nome))
 
 
-def filtrar_pacotes(texto, permitidos=PACOTES_PERMITIDOS):
-    """Troca nomes de pacote não aprovados em linhas `pip install` (e o import correspondente)."""
-    rejeitados = []
+def pacotes_citados(texto, permitidos=PACOTES_PERMITIDOS):
+    """Pacotes fora da lista aprovada em linhas `pip install`, `import` e `from ... import`."""
+    achados = []
+    for m in re.finditer(r"pip3? install ([^\n`]+)", texto):
+        achados += [p for p in m.group(1).split() if not p.startswith(("-", "["))]
+    achados += re.findall(r"^\s*(?:import|from)\s+([A-Za-z_][\w-]*)", texto, re.M)
+    vistos = []
+    for p in achados:
+        if p.lower() not in permitidos and p.lower() not in _PADRAO and p not in vistos:
+            vistos.append(p)
+    return vistos
 
-    def troca(m):
-        novos = []
-        for p in m.group(1).split():
-            if p.lower() in permitidos:
-                novos.append(p)
-            else:
-                rejeitados.append(p)
-                novos.append("[pacote-nao-aprovado]")
-        return "pip install " + " ".join(novos)
-    texto = re.sub(r"pip install ([^\n]+)", troca, texto)
+
+def filtrar_pacotes(texto, permitidos=PACOTES_PERMITIDOS):
+    """Troca os nomes de pacote não aprovados, em qualquer ponto do texto."""
+    rejeitados = pacotes_citados(texto, permitidos)
     for p in rejeitados:
-        texto = texto.replace(p.replace("-", "_"), "[pacote-nao-aprovado]")
+        texto = re.sub(r"(?<![\w-])" + re.escape(p) + r"(?![\w-])", "[pacote-nao-aprovado]", texto)
     return texto, rejeitados
 
 
@@ -254,7 +267,7 @@ class Politica:
 
 def politica_agenda():
     """Agente de chamados: pode consultar; reservar só com confirmação humana; nada além disso."""
-    return Politica(permitidas={"consultar_matricula", "reservar_sala"},
+    return Politica(permitidas={"consultar_matricula", "registrar_manutencao", "reservar_sala"},
                     exigem_confirmacao={"reservar_sala"})
 
 
@@ -277,15 +290,14 @@ def filtrar_por_perfil(trechos, perfil):
     return [t for t in trechos if perfil != "aluno" or "GABARITO" not in t.upper()]
 
 
-def repositorio_confiavel(nome_repo, hash_informado, aprovados=None):
-    """Cadeia de suprimentos (LLM03): verifica nome E hash contra uma allowlist ANTES de
-    qualquer carregamento. Não carrega nada: só decide se carregaria."""
-    aprovados = dados.HASHES_APROVADOS if aprovados is None else aprovados
-    return aprovados.get(nome_repo) == hash_informado
+def modelo_confiavel(nome, digest, aprovados=None):
+    """Cadeia de suprimentos (LLM03): nome E digest precisam estar na allowlist ANTES do uso."""
+    aprovados = dados.MODELOS_APROVADOS if aprovados is None else aprovados
+    return digest is not None and aprovados.get(nome) == digest
 
 
 class LimitadorTaxa:
-    """Rate limit por chave (contagem simples, sem relógio, para ser determinístico)."""
+    """Rate limit por chave (contagem simples, sem relógio)."""
 
     def __init__(self, maximo):
         self.maximo = maximo

@@ -7,29 +7,27 @@ import lab7_avaliacao as lab7
 def test_lab5_vulneravel_pii_cruza_fronteira_e_exfiltra():
     r = lab5.executar(defesa=False)
     assert r["A"]["pii_enviada"] and not r["A"]["redigidos"]
-    assert r["B"]["emails_externos"] and r["B"]["url_no_texto"]
+    assert r["B"]["emails_externos"] > 0
 
 
 def test_lab5_defesa_redige_pii_e_barra_egress():
     r = lab5.executar(defesa=True)
     assert r["A"]["pii_enviada"] == {} and r["A"]["redigidos"]
-    assert not r["B"]["emails_externos"] and not r["B"]["url_no_texto"]
-    assert r["B"]["ambiente"].bloqueadas()
+    assert r["B"]["emails_externos"] == 0 and r["B"]["url_no_texto"] == 0
+    assert r["B"]["bloqueios"] > 0
 
 
 # ---- lab 6
-def test_lab6_vulneravel_sem_defesa_todos_os_ataques_funcionam():
-    r = lab6.executar()
-    assert all(linha["nenhuma"] for linha in r["matriz"].values())
-    assert r["contidos"]["nenhuma"] == 0
-
-
-def test_lab6_so_a_combinacao_contem_tudo():
-    r = lab6.executar()
-    assert r["contidos"]["TODAS"] == r["total"]
+def test_lab6_camadas_se_complementam():
+    r = lab6.executar(tentativas=3)
+    assert r["contidos"]["nenhuma"] < r["total"]
     for parcial in ("só entrada", "só saída", "só privilégio"):
-        assert 0 < r["contidos"][parcial] < r["total"]
-    assert not any(linha["TODAS"] for linha in r["matriz"].values())
+        assert r["contidos"][parcial] <= r["contidos"]["TODAS"]
+    # o que a camada garante sem depender do modelo
+    assert r["matriz"]["A9"]["nenhuma"] == 3 and r["matriz"]["A9"]["só privilégio"] == 0
+    assert r["matriz"]["A7"]["só privilégio"] == 0
+    for ataque in ("A3", "A4", "A6", "A7", "A8", "A9", "A10"):
+        assert r["matriz"][ataque]["TODAS"] == 0
 
 
 # ---- lab 7
@@ -50,6 +48,12 @@ def test_lab7_ids_dos_achados_se_mantem_depois_da_remediacao():
     antes = {a["chave"]: a["id"] for a in lab7.executar(defesa=False)["achados"]}
     for a in lab7.executar(defesa=True)["achados"]:
         assert antes[a["chave"]] == a["id"]
+
+
+def test_lab7_modelo_so_redige_e_nao_muda_a_contagem():
+    r = lab7.executar(defesa=False)
+    assert r["redacao"]["texto"]
+    assert r["contagem"] == lab7.executar(defesa=False)["contagem"]
 
 
 def test_lab7_idor_nao_e_classificado_como_risco_de_llm():

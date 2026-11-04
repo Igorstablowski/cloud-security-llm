@@ -4,7 +4,8 @@
 Lê o inventário de um sistema com LLM (aula6/sistema_exemplo.json, o Portal de Orientação
 Acadêmica do Campus Aurora), cruza com um checklist componente x risco x controle, aponta as
 CÉLULAS VAZIAS como achados, atribui severidade pela matriz 3x3 (impacto x probabilidade) e gera
-um resumo executivo em linguagem de negócio. Não usa modelo de linguagem: é o método, não o modelo.
+um resumo executivo em linguagem de negócio. Achado e severidade são decididos em código; o modelo
+real no Ollama só redige uma versão do resumo, que o código confere antes de aceitar.
 
 Com --defesa: aplica o plano de remediação do próprio JSON e reavalia (antes x depois).
 
@@ -15,11 +16,12 @@ Uso:
 import copy
 import json
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 
-from campus import narrar  # noqa: E402
+from campus import llm, narrar  # noqa: E402
 
 CAMINHO = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sistema_exemplo.json")
 
@@ -186,22 +188,33 @@ def resumo_executivo(sistema, achados):
     return "\n".join(linhas)
 
 
+def redigir_com_modelo(resumo, achados, semente=0):
+    """O modelo reescreve o resumo para a reitoria. O código confere o que não pode mudar."""
+    texto = llm.LLM(semente=semente, temperatura=0.3).gerar([
+        {"role": "system", "content": "Você redige para a reitoria de uma universidade. Reescreva o resumo "
+                                      "a seguir em um parágrafo, sem siglas técnicas e sem acrescentar fatos."},
+        {"role": "user", "content": resumo}])
+    conhecidos = {a["id"] for a in achados}
+    problemas = ["cita achado inexistente: " + i for i in re.findall(r"F-\d+", texto) if i not in conhecidos]
+    return {"texto": texto, "problemas": problemas}
+
+
 def executar(defesa=False, caminho=None):
     sistema = carregar(caminho)
     antes = avaliar(sistema)
     final_sistema = aplicar_remediacao(sistema) if defesa else sistema
     achados = avaliar(final_sistema, ids={a["chave"]: a["id"] for a in antes})
     cont = lambda lst: {k: sum(1 for a in lst if a["severidade"] == k) for k in ("Alta", "Média", "Baixa")}  # noqa: E731
+    resumo = resumo_executivo(final_sistema, achados)
     return {"sistema": final_sistema, "achados": achados, "contagem": cont(achados),
-            "antes": cont(antes), "resumo": resumo_executivo(final_sistema, achados)}
+            "antes": cont(antes), "resumo": resumo, "redacao": redigir_com_modelo(resumo, achados)}
 
 
 def main(argv=None):
     args = narrar.ler_argumentos(__doc__, argv)
     r = executar(args.defesa)
     narrar.cabecalho("Laboratório 7 — Avaliação de ponta a ponta", args.defesa,
-                     modos=("DEPOIS DA REMEDIAÇÃO", "ANTES DA REMEDIAÇÃO"),
-                     aviso="Aviso: este laboratório não usa modelo de linguagem; avalia o método. Uso educacional.")
+                     modos=("DEPOIS DA REMEDIAÇÃO", "ANTES DA REMEDIAÇÃO"))
 
     narrar.secao("ATAQUE / SISTEMA AVALIADO")
     narrar.linha("Sistema: " + r["sistema"]["sistema"])
@@ -231,6 +244,11 @@ def main(argv=None):
     narrar.linha("")
     narrar.linha("RESUMO EXECUTIVO:")
     narrar.linha(r["resumo"], 4)
+    narrar.linha("")
+    narrar.linha("VERSÃO REDIGIDA PELO MODELO (confira contra o resumo acima):")
+    narrar.linha(r["redacao"]["texto"], 4)
+    for p in r["redacao"]["problemas"]:
+        narrar.linha("conferência automática: " + p, 4)
 
     narrar.secao("O QUE OBSERVAR")
     if args.defesa:
@@ -239,8 +257,9 @@ def main(argv=None):
     else:
         narrar.linha("- Os achados mais altos nascem do índice único: sensível + acessível a qualquer aluno autenticado.")
         narrar.linha("- O resumo traduz sigla em consequência (o que um aluno poderia ver ou fazer), não em 'LLM08'.")
+        narrar.linha("- Achado e severidade saíram do código. O modelo só redigiu: confira se ele manteve os números ou inventou algo.")
         narrar.linha("- Rode com --defesa para aplicar o plano de remediação e comparar antes x depois.")
 
 
 if __name__ == "__main__":
-    main()
+    narrar.rodar(main)
