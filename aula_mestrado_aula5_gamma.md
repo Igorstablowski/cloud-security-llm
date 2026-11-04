@@ -7,13 +7,13 @@ OWASP Top 10 para LLMs 2025 e superfícies de ataque por arquitetura), mas com t
 todos no universo fictício "Campus Aurora" (Aurora Assist, Acervo Aurora, Agenda Lab, Comitê de Bolsas, Notebook do
 grupo, API do Histórico). Dados 100% sintéticos; nenhuma relação com instituição real.
 
-Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 74 slides,
+Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 75 slides,
 conferido texto a texto contra este arquivo em 2026-11-04. Diferenças de estrutura, de propósito: no Gamma a
 abertura é a capa "Cyber Security & Governance" + o cartão "Cloud DevOps Security" do modelo FIAP, no lugar da capa
 abaixo; e os slides "Objetivos de aprendizagem", "Roteiro da aula" e "Um assistente no ar antes do parecer de risco"
 existem só aqui, não no deck.
 
-Este arquivo tem 76 slides no total (1 capa + 75 de conteúdo; em 2026-11-04 os slides com mais texto foram divididos em dois, sem mudar o conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
+Este arquivo tem 77 slides no total (1 capa + 76 de conteúdo; em 2026-11-04 os slides com mais texto foram divididos em dois, sem mudar o conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
 cada tópico e cada risco do Top 10 ganhou, além do slide conceitual, um slide de exemplo concreto (transcrição de
 prompt e saída); o mapa de riscos também foi dividido em uma estação por slide. Ajuste o tempo de apresentação ao
 vivo conforme o ritmo da turma — nem todo slide de exemplo precisa de discussão longa.
@@ -113,10 +113,9 @@ LAYOUT: um parágrafo de ementa em destaque no topo, e abaixo duas barras horizo
 ROTEIRO: gancho: o mesmo parágrafo de ementa gera, em geral, mais tokens em português do que em inglês. Deixe claro que a contagem exata depende do tokenizador usado; o próximo slide mostra divisões reais, sempre dizendo qual tokenizador mediu.
 -->
 
-- O modelo não lê palavras: lê tokens, pedaços de texto definidos por um tokenizador, e o mesmo parágrafo de ementa costuma render mais tokens em português do que em inglês.
-- Palavras longas ou raras tendem a ser quebradas em vários pedaços; como isso muda de um tokenizador para outro, nenhuma divisão específica deve ser tomada como regra.
-- Mais tokens significam mais custo por requisição e menos espaço na janela de contexto, o que pesa em sistemas em português que carregam documentos longos.
-- Do ponto de vista de segurança, filtros que olham palavras inteiras enxergam outra coisa que o modelo, e essa diferença de visão é terreno para evasão.
+- O modelo não lê palavras: lê tokens, pedaços de texto definidos por um tokenizador, e o mesmo parágrafo pode render mais tokens em português do que em inglês.
+- Palavras longas ou raras são quebradas em vários pedaços; como isso muda de um tokenizador para outro, nenhuma divisão específica deve ser tomada como regra.
+- Mais tokens significam mais custo por requisição e menos espaço na janela de contexto.
 
 ---
 
@@ -137,9 +136,8 @@ ROTEIRO: gancho: antes de mostrar, peça que a turma aposte quais palavras viram
 | bolsista | bols · ista (2) | student |
 | vulnerabilidade | vulner · abilidade (2) | matrícula, segurança, prazo (no GPT-4o) |
 
-- Palavras frequentes no treino viram um token inteiro; palavras raras ou longas são montadas com pedaços. O inglês domina o corpus de treino, por isso quase todo termo técnico em inglês é um token só.
+- Palavras frequentes no treino viram um token inteiro; palavras raras ou longas são montadas com pedaços.
 - No GPT-4o, "matrícula", "segurança" e "prazo" são um token cada no meio da frase; no GPT-4, "matrícula" ainda vira quatro pedaços (mat · r · ícul · a).
-- Digitada sozinha no site, sem o espaço antes, "matrícula" vira três pedaços: compare sempre o mesmo texto no mesmo tokenizador.
 - Para a segurança: o filtro procura a palavra inteira, o modelo lê pedaços, e uma grafia trocada muda os pedaços sem mudar o sentido.
 
 ---
@@ -153,7 +151,6 @@ ROTEIRO: gancho: faça a turma contar à mão quantos "pedaços" caberiam na fra
 -->
 
 - A pergunta "Qual o prazo de trancamento da disciplina de Segurança de Sistemas?" tem 67 caracteres; a regra prática de uns quatro caracteres por token (pensada para o inglês) daria perto de 17.
-- Medida de verdade, ela dá 19 tokens no tokenizador do GPT-4 e 14 no do GPT-4o, que conhece melhor o português: palavras menos frequentes no treino, como "trancamento", ainda são cortadas em pedaços.
 - A versão em inglês, "What is the deadline to withdraw from the Systems Security course?", tem quase o mesmo tamanho e dá 12 tokens nos dois tokenizadores: cada palavra comum do inglês é um token inteiro.
 - O que pesa não é o número de letras, é o quanto o vocabulário do tokenizador conhece aquela língua.
 
@@ -168,7 +165,6 @@ ROTEIRO: gancho: leve a conta do slide anterior para a escala de um sistema real
 -->
 
 - Um edital inteiro de bolsa, com umas 400 palavras, soma algo entre 500 e 700 tokens em português, conforme o tokenizador (a ementa medida no próximo slide dá de 1,3 a 1,8 token por palavra).
-- Multiplicado por centenas de consultas por dia, a diferença de idioma vira diferença real de custo e de espaço na janela de contexto.
 - É o mesmo motivo pelo qual o Laboratório 1 mede tokens em vez de contar palavras: cada token consumido é orçamento de contexto e de centavos, e por isso o consumo sem limite (LLM10, adiante no Bloco 2) também é uma questão de segurança.
 
 ---
@@ -187,7 +183,7 @@ ROTEIRO: gancho: mostre a tabela e destaque duas leituras: o inglês fica igual 
 | A mesma pergunta, em inglês | 66 | 12 tokens | 12 tokens |
 | Parágrafo de ementa, em português (30 palavras) | 212 | 38 tokens | 53 tokens |
 | O mesmo parágrafo, em inglês (25 palavras) | 189 | 28 tokens | 28 tokens |
-| A palavra "vulnerabilidade" | 15 | 3 tokens (v · ulner · abilidade) | 3 tokens |
+| A palavra "vulnerabilidade", digitada sozinha | 15 | 3 tokens (v · ulner · abilidade) | 3 tokens |
 
 - O inglês dá o mesmo número nos dois tokenizadores; o português melhora no mais novo, mas continua custando mais: a ementa vai de 28 tokens em inglês para 38 a 53 em português.
 - O tokenizador de brinquedo do Laboratório 1 conta 61 tokens contra 28 para a mesma ementa: ele exagera de propósito, para o efeito ficar visível. Os números reais estão nesta tabela.
@@ -234,6 +230,21 @@ ROTEIRO: gancho: a secretaria bloqueia "gabarito" e "prova antiga", e o aluno pe
 - Pedir "as respostas da AP2 do semestre passado" não contém nenhuma palavra proibida e, ainda assim, expressa exatamente a mesma intenção, que o modelo compreende sem dificuldade.
 - Uma lista de bloqueio casa sequências de caracteres; o modelo opera sobre sentido, e por isso o conjunto de reformulações possíveis é grande demais para enumerar.
 - Lista de bloqueio serve como camada barata contra abuso casual, nunca como controle principal; o Laboratório 2 mostra o filtro sendo contornado e depois combinado com outras defesas.
+
+---
+
+## WAF com regra de palavra não protege um LLM
+_conteúdo_
+
+<!--
+LAYOUT: uma requisição atravessando um WAF com regras de assinatura; três variações da mesma ordem (em inglês, por paráfrase, com uma letra trocada) passam sem ser barradas, e um PDF entra pelo lado, por dentro da borda, sem passar pelo WAF.
+ROTEIRO: gancho: pergunte quem na turma confia no WAF da empresa para barrar ataques web. Explique que o WAF clássico foi feito para SQL injection e XSS, ataques que têm sintaxe; a injeção de prompt é linguagem natural. Não desmereça o WAF: ele continua útil para limite de taxa, bots e ataques web comuns, inclusive contra a API do assistente (LLM10). Produtos vendidos como "firewall para IA" trocam a lista de palavras por classificadores: ajudam, mas também erram, e a Aula 6 volta a esse ponto em guardrails. O Laboratório 2 mostra a lista de bloqueio sendo burlada.
+-->
+
+- Um WAF com regras de palavra-chave foi pensado para SQL injection e XSS, ataques com sintaxe previsível; uma injeção de prompt é linguagem natural e pode ser escrita de infinitas formas.
+- A mesma ordem passa em inglês, por paráfrase ou com uma letra trocada, que muda os tokens sem mudar o sentido; e bloquear palavras como "ignore" ou "prompt" também barra o aluno que só quer estudar o assunto.
+- A injeção indireta chega dentro de um PDF, de um documento já indexado ou da saída de uma ferramenta: conteúdo que o WAF não interpreta ou que nem passa por ele.
+- O WAF continua útil para o que já faz, como limite de taxa e bloqueio de bots; contra injeção, a defesa fica em volta do modelo: separar papéis, limitar privilégios e validar a saída.
 
 ---
 
