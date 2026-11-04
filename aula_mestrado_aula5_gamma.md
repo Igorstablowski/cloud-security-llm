@@ -7,14 +7,14 @@ OWASP Top 10 para LLMs 2025 e superfícies de ataque por arquitetura), mas com t
 todos no universo fictício "Campus Aurora" (Aurora Assist, Acervo Aurora, Agenda Lab, Comitê de Bolsas, Notebook do
 grupo, API do Histórico). Dados 100% sintéticos; nenhuma relação com instituição real.
 
-Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 137 slides,
+Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 136 slides,
 conferido texto a texto contra este arquivo em 2026-11-04. Diferenças de estrutura, de propósito: no Gamma a
 abertura é a capa "Cyber Security & Governance" + o cartão "Cloud DevOps Security" do modelo FIAP, no lugar da capa
 abaixo; e os slides "Objetivos de aprendizagem" e "Roteiro da aula"
 existem só aqui, não no deck. Os slides "Por que a AppSec tradicional não atende um LLM" e "A barreira do SQL
 injection que o LLM não tem" estão nos dois, logo depois do cartão "Cloud DevOps Security".
 
-Este arquivo tem 140 slides no total (1 capa + 139 de conteúdo; desde 2026-11-04 todo slide com 4 parágrafos ou mais é dividido em dois; em 2026-11-04 os slides com mais texto foram divididos em dois, sem mudar o conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
+Este arquivo tem 139 slides no total (1 capa + 138 de conteúdo; desde 2026-11-04 todo slide com 4 parágrafos ou mais é dividido em dois; em 2026-11-04 os slides com mais texto foram divididos em dois, sem mudar o conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
 cada tópico e cada risco do Top 10 ganhou, além do slide conceitual, um slide de exemplo concreto (transcrição de
 prompt e saída); o mapa de riscos também foi dividido em uma estação por slide. Ajuste o tempo de apresentação ao
 vivo conforme o ritmo da turma — nem todo slide de exemplo precisa de discussão longa.
@@ -139,20 +139,6 @@ ROTEIRO: continuação de "Por que a AppSec tradicional não atende um LLM"; os 
 
 ---
 
-## O que é o system prompt: as regras que o aplicativo põe antes da conversa
-_conteúdo_
-
-<!--
-LAYOUT: pilha de mensagens de uma chamada ao modelo: no topo o system prompt (destacado, com o texto do Aurora Assist), abaixo o histórico e a pergunta do aluno; uma tela de chat ao lado mostrando que o aluno só vê a pergunta e a resposta.
-ROTEIRO: gancho: pergunte quem já escreveu um system prompt e onde ele fica. Mostre que ele é enviado a cada chamada, junto com o resto, e prepare o próximo slide: se é só texto no início do contexto, não existe a separação que protege o SQL. O texto do exemplo é o mesmo prompt do Aurora Assist usado nos laboratórios (campus/dados.py).
--->
-
-- O system prompt é o texto que o desenvolvedor coloca antes da conversa para definir papel e regras, como no Aurora Assist: "Responda sobre matrícula, prazos e declarações. Nunca forneça gabaritos nem provas antigas."
-- O aluno não o vê na tela, mas a aplicação o envia ao modelo em toda chamada, junto com o histórico e a pergunta, porque o modelo não guarda nada de uma chamada para outra.
-- O modelo foi treinado para dar mais peso a esse texto, mas isso é tendência, não trava: o system prompt não é uma configuração protegida, é só texto no início do contexto.
-
----
-
 ## A barreira do SQL injection que o LLM não tem
 _conteúdo_
 
@@ -217,26 +203,6 @@ ROTEIRO: gancho: faça a turma contar à mão quantos "pedaços" caberiam na fra
 
 ---
 
-## Resultado do teste: os mesmos textos num tokenizador real
-_conteúdo_
-
-<!--
-LAYOUT: tabela nativa do Gamma com as cinco linhas e as quatro colunas abaixo, ocupando a largura do cartão, sem imagem lateral.
-ROTEIRO: gancho: mostre a tabela e destaque duas leituras: o inglês fica igual nos dois tokenizadores e o português cai de 53 para 38 tokens na ementa no tokenizador mais novo. Contagem medida em 2026-11-04 com a biblioteca tiktoken, que usa os mesmos tokenizadores dos dois sites do próximo slide; a linha da "vulnerabilidade" é a palavra digitada sozinha, como no site.
--->
-
-| Texto | Caracteres | GPT-4o (o200k_base) | GPT-4 (cl100k_base) |
-|---|---|---|---|
-| Pergunta do trancamento, em português | 67 | 14 tokens | 19 tokens |
-| A mesma pergunta, em inglês | 66 | 12 tokens | 12 tokens |
-| Parágrafo de ementa, em português (30 palavras) | 212 | 38 tokens | 53 tokens |
-| O mesmo parágrafo, em inglês (25 palavras) | 189 | 28 tokens | 28 tokens |
-| A palavra "vulnerabilidade", digitada sozinha | 15 | 3 tokens (v · ulner · abilidade) | 3 tokens |
-
-- O inglês dá o mesmo número nos dois tokenizadores; o português melhora no mais novo, mas continua custando mais: a ementa vai de 28 tokens em inglês para 38 a 53 em português.
-
----
-
 ## Teste você mesmo: duas calculadoras de tokens
 _prática_
 
@@ -247,46 +213,6 @@ ROTEIRO: gancho: peça que alguém abra um dos links e cole a pergunta do tranca
 
 - [OpenAI Tokenizer](https://platform.openai.com/tokenizer), oficial, para os tokenizadores do GPT; e [Tiktokenizer](https://tiktokenizer.vercel.app), que mostra os tokens coloridos e deixa escolher o tokenizador.
 - Outros modelos, como Claude e Llama, usam tokenizadores próprios e dão contagens diferentes; ao citar um número de tokens, diga sempre qual tokenizador mediu.
-
----
-
-## Como o modelo lê e constrói o texto: um token de cada vez
-_conteúdo_
-
-<!--
-LAYOUT: duas etapas: à esquerda, o contexto virando tokens ligados entre si (leitura); à direita, a frase crescendo token a token, com barras de probabilidade para as próximas opções (escrita).
-ROTEIRO: gancho: pergunte de onde vem a resposta do modelo; muita gente imagina uma busca num banco de respostas. Mostre o laço: calcula, escolhe, acrescenta, repete. As datas do exemplo são as mesmas do Laboratório 1 e preparam o próximo slide, em que a mesma pergunta dá datas diferentes.
--->
-
-- Para ler, o modelo converte o contexto inteiro em tokens e, com a atenção, relaciona cada um com os demais; é daí que vem a coerência da resposta.
-- Para escrever, ele calcula a probabilidade de cada token possível vir a seguir, escolhe um, acrescenta ao texto e repete até terminar a resposta.
-- Em "O prazo de trancamento é até", continuações como "15 de março" ou "22 de março" podem ser todas plausíveis; nada é consultado num banco de respostas certas, a menos que a aplicação coloque uma fonte no contexto.
-
----
-
-## Gerar é sortear: duas respostas para a mesma pergunta
-_conteúdo_
-
-<!--
-LAYOUT: uma pergunta ao centro e duas setas partindo dela para duas respostas diferentes, cada uma com uma data distinta; um selo "decisão sobre dado errado".
-ROTEIRO: gancho: "qual o prazo de trancamento?" respondida com datas diferentes em duas execuções. Pergunte quem decidiria algo com a primeira resposta, e explique que isso não é falha pontual, é a natureza do sorteio. Antecipe o Laboratório 1.
--->
-
-- Perguntado duas vezes sobre o prazo de trancamento, o assistente pode responder com datas diferentes sem que haja defeito: o modelo sorteia o próximo token a partir de uma distribuição de probabilidades.
-- A atenção permite que cada token olhe para o contexto inteiro, o que dá fluência e coerência, mas não dá garantia de que o conteúdo gerado corresponda a um fato verificado.
-
----
-
-## Quando a data sorteada vira decisão do aluno
-_conteúdo_
-
-<!--
-LAYOUT: mesmo estilo visual do slide anterior ("Gerar é sortear: duas respostas para a mesma pergunta"), com imagem lateral própria gerada a partir deste texto.
-ROTEIRO: continuação de "Gerar é sortear: duas respostas para a mesma pergunta"; os dois slides formam um único tópico — apresente-os em sequência.
--->
-
-- Quando um aluno decide perder ou não uma matrícula com base em uma data sorteada, o erro deixa de ser curiosidade técnica e vira responsabilidade da instituição.
-- A resposta de engenharia é ancorar a resposta em fonte oficial e não tratar saída do modelo como fato; temperatura baixa reduz a variação, mas não elimina o erro.
 
 ---
 
@@ -338,6 +264,46 @@ ROTEIRO: continuação de "WAF com regra de palavra não protege um LLM"; os doi
 -->
 
 - A injeção indireta chega dentro de um PDF, de um documento já indexado ou da saída de uma ferramenta: conteúdo que o WAF não interpreta ou que nem passa por ele.
+
+---
+
+## Como o modelo lê e constrói o texto: um token de cada vez
+_conteúdo_
+
+<!--
+LAYOUT: duas etapas: à esquerda, o contexto virando tokens ligados entre si (leitura); à direita, a frase crescendo token a token, com barras de probabilidade para as próximas opções (escrita).
+ROTEIRO: gancho: pergunte de onde vem a resposta do modelo; muita gente imagina uma busca num banco de respostas. Mostre o laço: calcula, escolhe, acrescenta, repete. As datas do exemplo são as mesmas do Laboratório 1 e preparam o próximo slide, em que a mesma pergunta dá datas diferentes.
+-->
+
+- Para ler, o modelo converte o contexto inteiro em tokens e, com a atenção, relaciona cada um com os demais; é daí que vem a coerência da resposta.
+- Para escrever, ele calcula a probabilidade de cada token possível vir a seguir, escolhe um, acrescenta ao texto e repete até terminar a resposta.
+- Em "O prazo de trancamento é até", continuações como "15 de março" ou "22 de março" podem ser todas plausíveis; nada é consultado num banco de respostas certas, a menos que a aplicação coloque uma fonte no contexto.
+
+---
+
+## Gerar é sortear: duas respostas para a mesma pergunta
+_conteúdo_
+
+<!--
+LAYOUT: uma pergunta ao centro e duas setas partindo dela para duas respostas diferentes, cada uma com uma data distinta; um selo "decisão sobre dado errado".
+ROTEIRO: gancho: "qual o prazo de trancamento?" respondida com datas diferentes em duas execuções. Pergunte quem decidiria algo com a primeira resposta, e explique que isso não é falha pontual, é a natureza do sorteio. Antecipe o Laboratório 1.
+-->
+
+- Perguntado duas vezes sobre o prazo de trancamento, o assistente pode responder com datas diferentes sem que haja defeito: o modelo sorteia o próximo token a partir de uma distribuição de probabilidades.
+- A atenção permite que cada token olhe para o contexto inteiro, o que dá fluência e coerência, mas não dá garantia de que o conteúdo gerado corresponda a um fato verificado.
+
+---
+
+## Quando a data sorteada vira decisão do aluno
+_conteúdo_
+
+<!--
+LAYOUT: mesmo estilo visual do slide anterior ("Gerar é sortear: duas respostas para a mesma pergunta"), com imagem lateral própria gerada a partir deste texto.
+ROTEIRO: continuação de "Gerar é sortear: duas respostas para a mesma pergunta"; os dois slides formam um único tópico — apresente-os em sequência.
+-->
+
+- Quando um aluno decide perder ou não uma matrícula com base em uma data sorteada, o erro deixa de ser curiosidade técnica e vira responsabilidade da instituição.
+- A resposta de engenharia é ancorar a resposta em fonte oficial e não tratar saída do modelo como fato; temperatura baixa reduz a variação, mas não elimina o erro.
 
 ---
 
@@ -432,6 +398,20 @@ ROTEIRO: continuação de "Por que a mesma regra vale e não vale: o pretexto qu
 
 ---
 
+## O que é o system prompt: as regras que o aplicativo põe antes da conversa
+_conteúdo_
+
+<!--
+LAYOUT: pilha de mensagens de uma chamada ao modelo: no topo o system prompt (destacado, com o texto do Aurora Assist), abaixo o histórico e a pergunta do aluno; uma tela de chat ao lado mostrando que o aluno só vê a pergunta e a resposta.
+ROTEIRO: gancho: pergunte quem já escreveu um system prompt e onde ele fica. Mostre que ele é enviado a cada chamada, junto com o resto, e prepare o próximo slide: se é só texto no início do contexto, não existe a separação que protege o SQL. O texto do exemplo é o mesmo prompt do Aurora Assist usado nos laboratórios (campus/dados.py).
+-->
+
+- O system prompt é o texto que o desenvolvedor coloca antes da conversa para definir papel e regras, como no Aurora Assist: "Responda sobre matrícula, prazos e declarações. Nunca forneça gabaritos nem provas antigas."
+- O aluno não o vê na tela, mas a aplicação o envia ao modelo em toda chamada, junto com o histórico e a pergunta, porque o modelo não guarda nada de uma chamada para outra.
+- O modelo foi treinado para dar mais peso a esse texto, mas isso é tendência, não trava: o system prompt não é uma configuração protegida, é só texto no início do contexto.
+
+---
+
 ## DAN: quando pedir para o modelo "ser outra IA" quase funcionava
 _conteúdo_
 
@@ -479,21 +459,7 @@ LAYOUT: duas colunas: "memorizado nos pesos" (selo Nasr et al., 2023) e "no prom
 ROTEIRO: gancho: diferencie este caso do vazamento do prompt do sistema que a turma verá no Bloco 2 — aqui o segredo não está no prompt, está decorado dentro dos pesos, porque apareceu repetidas vezes nos tickets de suporte usados no ajuste fino.
 -->
 
-- Nasr et al. (Google DeepMind, 2023) mostraram esse mesmo mecanismo em escala contra um modelo de produção, extraindo trechos reais de dado de treino com um ataque de divergência.
 - A diferença para o vazamento do prompt do sistema é a origem: aqui o segredo nunca esteve no texto da conversa atual, estava no corpus de treino, e por isso a correção não é mudar o prompt, é nunca treinar com segredos.
-
----
-
-## Guardrail de verdade: uma camada a mais, não uma garantia
-_conteúdo_
-
-<!--
-LAYOUT: diagrama nativo: pedido do usuário → caixa "classificador de política" (NeMo Guardrails / Llama Guard) → modelo principal → resposta; uma seta pontilhada mostrando um pedido que engana o classificador.
-ROTEIRO: gancho: apresente as duas ferramentas como exemplos reais, não como solução definitiva; adiante, sem repetir, que a Aula 6 volta a este ponto com o tema de guardrails como classificador que também erra.
--->
-
-- NeMo Guardrails, projeto open source da NVIDIA, permite programar "trilhos" de conversa que verificam o pedido do usuário e a resposta do modelo antes de deixá-los passar, como regras sobre o que o Aurora Assist pode ou não tratar.
-- Llama Guard, modelo de classificação da Meta ajustado especificamente para moderação, lê um prompt ou uma resposta e devolve um veredito sobre categorias de risco, servindo como uma segunda opinião antes ou depois da chamada principal.
 
 ---
 
@@ -1534,6 +1500,19 @@ ROTEIRO: gancho: um chamado de suporte com instrução escondida faz o agente re
 
 - O Agenda Lab funciona em ciclo: o agente decide o que fazer, chama uma ferramenta, observa o resultado e decide de novo, e cada resultado lido volta ao contexto como novo texto a obedecer.
 - Um chamado de suporte com uma instrução escondida faz o agente reservar o auditório, enviar a lista de bolsistas para um endereço externo e cancelar a reserva da banca, tudo com as credenciais legítimas do sistema.
+
+---
+
+## Guardrail de verdade: uma camada a mais, não uma garantia
+_conteúdo_
+
+<!--
+LAYOUT: diagrama nativo: pedido do usuário → caixa "classificador de política" (NeMo Guardrails / Llama Guard) → modelo principal → resposta; uma seta pontilhada mostrando um pedido que engana o classificador.
+ROTEIRO: gancho: apresente as duas ferramentas como exemplos reais, não como solução definitiva; adiante, sem repetir, que a Aula 6 volta a este ponto com o tema de guardrails como classificador que também erra.
+-->
+
+- NeMo Guardrails, projeto open source da NVIDIA, permite programar "trilhos" de conversa que verificam o pedido do usuário e a resposta do modelo antes de deixá-los passar, como regras sobre o que o Aurora Assist pode ou não tratar.
+- Llama Guard, modelo de classificação da Meta ajustado especificamente para moderação, lê um prompt ou uma resposta e devolve um veredito sobre categorias de risco, servindo como uma segunda opinião antes ou depois da chamada principal.
 
 ---
 
