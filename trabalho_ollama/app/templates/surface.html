@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Campus Aurora{% endblock %}
+{% block content %}
+<a class="back" href="/">&larr; voltar</a>
+<div class="card">
+  <h2>{{ title }}
+    {% for tag in owasp %}<span class="badge">{{ tag }}</span>{% endfor %}
+  </h2>
+  <p>{{ description }}</p>
+  {% if vuln_note %}<p class="vuln-note">{{ vuln_note | safe }}</p>{% endif %}
+
+  <form id="surface-form">
+    {% for f in fields %}
+      <label for="{{ f.name }}">{{ f.label }}</label>
+      {% if f.type == "textarea" %}
+        <textarea id="{{ f.name }}" name="{{ f.name }}" placeholder="{{ f.placeholder or '' }}">{{ f.value or '' }}</textarea>
+      {% else %}
+        <input type="text" id="{{ f.name }}" name="{{ f.name }}" placeholder="{{ f.placeholder or '' }}" value="{{ f.value or '' }}">
+      {% endif %}
+    {% endfor %}
+    <button type="submit">Enviar</button>
+  </form>
+
+  <pre class="output" id="surface-output">A resposta aparece aqui.</pre>
+  {% if render_raw %}
+  <div class="rendered-output" id="surface-rendered">
+    <small>Renderização bruta da saída do modelo (demo LLM05 — propositalmente sem escapar):</small>
+  </div>
+  {% endif %}
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+  initSurfaceForm("surface-form", "{{ action }}", "surface-output", {
+    {% if render_raw %}renderedId: "surface-rendered", renderRaw: "{{ render_raw }}"{% endif %}
+  });
+</script>
+{% endblock %}

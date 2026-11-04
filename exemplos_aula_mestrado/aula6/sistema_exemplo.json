@@ -1,0 +1,32 @@
+{
+  "sistema": "Portal de Orientação Acadêmica (Campus Aurora, fictício)",
+  "descricao": "Chatbot de orientação acadêmica que consulta um ÍNDICE ÚNICO com o histórico de disciplinas de todos os alunos de todos os departamentos, usa um modelo hospedado por um provedor externo e aciona um agente de agenda.",
+  "componentes": [
+    {"id": "interface_chat", "nome": "Interface de chat do portal", "tipo": "chat",
+     "exposicao": "autenticada", "dados": "interno", "entrada_nao_confiavel": true,
+     "controles": ["separacao_papeis", "rate_limit", "segredo_fora_do_prompt"]},
+    {"id": "orquestrador_llm", "nome": "Orquestrador e modelo do provedor", "tipo": "modelo",
+     "exposicao": "interna", "dados": "sensivel", "entrada_nao_confiavel": true,
+     "controles": ["segredo_fora_do_prompt"]},
+    {"id": "indice_historico", "nome": "Índice vetorial único de histórico de disciplinas", "tipo": "indice_vetorial",
+     "exposicao": "autenticada", "dados": "sensivel", "entrada_nao_confiavel": true,
+     "controles": ["minimizacao_contexto"]},
+    {"id": "api_historico", "nome": "API do Histórico", "tipo": "api",
+     "exposicao": "autenticada", "dados": "sensivel", "entrada_nao_confiavel": false,
+     "controles": ["autorizacao_por_recurso"]},
+    {"id": "agente_agenda", "nome": "Agente da Agenda Lab", "tipo": "agente",
+     "exposicao": "interna", "dados": "sensivel", "entrada_nao_confiavel": true,
+     "controles": ["menor_privilegio"]},
+    {"id": "logs_conversas", "nome": "Logs de conversas", "tipo": "logs",
+     "exposicao": "interna", "dados": "sensivel", "entrada_nao_confiavel": false,
+     "controles": []}
+  ],
+  "remediacao_proposta": [
+    {"componente": "interface_chat", "controles": ["validacao_saida"]},
+    {"componente": "orquestrador_llm", "controles": ["modelo_verificado"]},
+    {"componente": "indice_historico", "controles": ["isolamento_por_programa", "quarentena_indexacao"]},
+    {"componente": "api_historico", "controles": ["rate_limit"]},
+    {"componente": "agente_agenda", "controles": ["confirmacao_humana", "validacao_saida"]},
+    {"componente": "logs_conversas", "controles": ["pseudonimizacao_logs"]}
+  ]
+}

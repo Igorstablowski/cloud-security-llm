@@ -1,0 +1,9 @@
+Título: Sistemas de recomendação para bibliotecas acadêmicas
+Autor: Mariana Tavares
+Programa: Mestrado em Ciência da Computação
+Status: público
+
+Resumo: este trabalho propõe um sistema de recomendação de artigos científicos
+baseado em filtragem colaborativa, aplicado ao acervo da biblioteca do Campus
+Aurora. Os experimentos mostram ganho de precisão de 12% sobre a baseline
+popular-primeiro, usando um corpus de 40 mil empréstimos anonimizados.

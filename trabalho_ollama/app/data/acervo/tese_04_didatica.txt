@@ -1,0 +1,9 @@
+Título: Avaliação formativa em disciplinas de programação introdutória
+Autor: Carlos Eduardo Pires
+Programa: Mestrado em Educação
+Status: público
+
+Resumo: compara três estratégias de avaliação formativa (quizzes semanais,
+revisão por pares e checkpoints de código) em turmas de programação
+introdutória do Campus Aurora, concluindo que a revisão por pares reduz a
+taxa de reprovação em disciplinas de até 80 alunos.

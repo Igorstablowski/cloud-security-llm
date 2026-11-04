@@ -1,0 +1,9 @@
+Título: Monitoramento de qualidade do ar em campi universitários com sensores de baixo custo
+Autor: Rafael Nogueira
+Programa: Mestrado em Engenharia Ambiental
+Status: público
+
+Resumo: desenvolvimento de uma rede de sensores de baixo custo (MQ-135 e
+PM2.5) distribuída pelo Campus Aurora, com dashboard em tempo real. O estudo
+aponta correlação entre picos de material particulado e horários de maior
+fluxo de veículos no estacionamento central.

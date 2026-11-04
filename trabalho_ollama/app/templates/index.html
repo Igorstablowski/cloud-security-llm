@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<p>Cada cartão abaixo é uma superfície diferente, espelhando as seis arquiteturas
+da Aula 5 (chat simples, RAG, agente com ferramentas, multi-agente, pipeline de
+código e API exposta). Todas chamam um modelo real rodando no Ollama local —
+sem chave, sem custo, sem rede externa.</p>
+<div class="grid">
+  {% for s in surfaces %}
+  <div class="card">
+    <h2><a href="{{ s.path }}">{{ s.title }}</a>
+      {% for tag in s.owasp %}<span class="badge">{{ tag }}</span>{% endfor %}
+    </h2>
+    <p>{{ s.description }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
