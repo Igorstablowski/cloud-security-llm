@@ -9,8 +9,8 @@ Padrão dos bullets: prosa corrida, 3 a 4 por slide, sem matemática pesada, exe
 Mantidos: PT-BR, segurança defensiva, OWASP sempre 2025 (documento padrão de conscientização, nunca "framework"),
 diagramas nativos do Gamma (nunca ASCII), sem emoji.
 
-Deck no Gamma: "Copy of FIAP - Cloud DevOps Security - Exercicio 1"
-(https://gamma.app/docs/Copy-of-FIAP-Cloud-DevOps-Security-Exercicio-1-1toxlwbbdtctd6v), tema Blue Steel, o
+Deck no Gamma: "Cloud DevOps Security - Trabalho 1"
+(https://gamma.app/docs/Cloud-DevOps-Security-Trabalho-1-1toxlwbbdtctd6v), tema Blue Steel, o
 mesmo das Aulas 5/6. Ordem no deck: capa "Cyber Security & Governance" e cartão "Cloud DevOps Security" (com o
 autor) do modelo FIAP; os cartões deste arquivo a partir do título; e o cartão final "Material Didático — Uso
 Restrito". No Gamma, o cartão de título traz só "Trabalho prático 1 · Segurança em LLMs · 2026", porque o autor
