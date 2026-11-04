@@ -117,7 +117,6 @@ ROTEIRO: gancho: pergunte como a turma se defende de SQL injection hoje e chegue
 - Contra SQL injection existe uma barreira estrutural: na consulta parametrizada `SELECT situacao FROM matricula WHERE aluno = ?`, o valor digitado vai num campo separado e nunca é executado como comando.
 - Se o aluno digita `A-1001' OR '1'='1`, o banco procura uma matrícula com esse nome estranho e não acha nada: o ataque morre na separação, não na esperteza de um filtro.
 - No LLM não existe esse campo: o prompt do sistema, a pergunta do aluno e o edital viram uma única sequência de tokens, e uma frase do edital pode dar ordens como a do desenvolvedor.
-- Papéis como system e user ajudam, mas são uma convenção que o modelo aprendeu, não uma barreira garantida; por isso a defesa vai para fora do modelo, como mostram o Laboratório 2 e a Aula 6.
 
 ---
 
@@ -129,7 +128,7 @@ LAYOUT: um parágrafo de ementa em destaque no topo, e abaixo duas barras horizo
 ROTEIRO: gancho: o mesmo parágrafo de ementa gera, em geral, mais tokens em português do que em inglês. Deixe claro que a contagem exata depende do tokenizador usado; o próximo slide mostra divisões reais, sempre dizendo qual tokenizador mediu.
 -->
 
-- O modelo não lê palavras: lê tokens, pedaços de texto definidos por um tokenizador, e o mesmo parágrafo pode render mais tokens em português do que em inglês.
+- O modelo não lê palavras: lê tokens, pedaços de texto definidos por um tokenizador, e o mesmo parágrafo pode render mais tokens em diferentes idiomas.
 - Palavras longas ou raras são quebradas em vários pedaços; como isso muda de um tokenizador para outro, nenhuma divisão específica deve ser tomada como regra.
 - Mais tokens significam mais custo por requisição e menos espaço na janela de contexto.
 
@@ -154,7 +153,6 @@ ROTEIRO: gancho: antes de mostrar, peça que a turma aposte quais palavras viram
 
 - Palavras frequentes no treino viram um token inteiro; palavras raras ou longas são montadas com pedaços.
 - No GPT-4o, "matrícula", "segurança" e "prazo" são um token cada no meio da frase; no GPT-4, "matrícula" ainda vira quatro pedaços (mat · r · ícul · a).
-- Para a segurança: o filtro procura a palavra inteira, o modelo lê pedaços, e uma grafia trocada muda os pedaços sem mudar o sentido.
 
 ---
 
