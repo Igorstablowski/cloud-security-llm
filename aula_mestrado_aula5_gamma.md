@@ -202,7 +202,7 @@ LAYOUT: dois cartões lado a lado, um para cada calculadora, com o nome como lin
 ROTEIRO: gancho: peça que alguém abra um dos links e cole a pergunta do trancamento ao vivo; o número tem que bater com a tabela anterior. Depois cole uma palavra sozinha e a mesma palavra no meio de uma frase, para a turma ver a contagem mudar.
 -->
 
-- OpenAI Tokenizer (https://platform.openai.com/tokenizer), oficial, para os tokenizadores do GPT; e Tiktokenizer (https://tiktokenizer.vercel.app), que mostra os tokens coloridos e deixa escolher o tokenizador.
+- [OpenAI Tokenizer](https://platform.openai.com/tokenizer), oficial, para os tokenizadores do GPT; e [Tiktokenizer](https://tiktokenizer.vercel.app), que mostra os tokens coloridos e deixa escolher o tokenizador.
 - Outros modelos, como Claude e Llama, usam tokenizadores próprios e dão contagens diferentes; ao citar um número de tokens, diga sempre qual tokenizador mediu.
 
 ---
