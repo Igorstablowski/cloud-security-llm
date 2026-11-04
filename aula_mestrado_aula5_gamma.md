@@ -7,14 +7,14 @@ OWASP Top 10 para LLMs 2025 e superfícies de ataque por arquitetura), mas com t
 todos no universo fictício "Campus Aurora" (Aurora Assist, Acervo Aurora, Agenda Lab, Comitê de Bolsas, Notebook do
 grupo, API do Histórico). Dados 100% sintéticos; nenhuma relação com instituição real.
 
-Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 134 slides,
+Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 137 slides,
 conferido texto a texto contra este arquivo em 2026-11-04. Diferenças de estrutura, de propósito: no Gamma a
 abertura é a capa "Cyber Security & Governance" + o cartão "Cloud DevOps Security" do modelo FIAP, no lugar da capa
 abaixo; e os slides "Objetivos de aprendizagem" e "Roteiro da aula"
 existem só aqui, não no deck. Os slides "Por que a AppSec tradicional não atende um LLM" e "A barreira do SQL
 injection que o LLM não tem" estão nos dois, logo depois do cartão "Cloud DevOps Security".
 
-Este arquivo tem 137 slides no total (1 capa + 136 de conteúdo; desde 2026-11-04 todo slide com 4 parágrafos ou mais é dividido em dois; em 2026-11-04 os slides com mais texto foram divididos em dois, sem mudar o conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
+Este arquivo tem 140 slides no total (1 capa + 139 de conteúdo; desde 2026-11-04 todo slide com 4 parágrafos ou mais é dividido em dois; em 2026-11-04 os slides com mais texto foram divididos em dois, sem mudar o conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
 cada tópico e cada risco do Top 10 ganhou, além do slide conceitual, um slide de exemplo concreto (transcrição de
 prompt e saída); o mapa de riscos também foi dividido em uma estação por slide. Ajuste o tempo de apresentação ao
 vivo conforme o ritmo da turma — nem todo slide de exemplo precisa de discussão longa.
@@ -139,6 +139,20 @@ ROTEIRO: continuação de "Por que a AppSec tradicional não atende um LLM"; os 
 
 ---
 
+## O que é o system prompt: as regras que o aplicativo põe antes da conversa
+_conteúdo_
+
+<!--
+LAYOUT: pilha de mensagens de uma chamada ao modelo: no topo o system prompt (destacado, com o texto do Aurora Assist), abaixo o histórico e a pergunta do aluno; uma tela de chat ao lado mostrando que o aluno só vê a pergunta e a resposta.
+ROTEIRO: gancho: pergunte quem já escreveu um system prompt e onde ele fica. Mostre que ele é enviado a cada chamada, junto com o resto, e prepare o próximo slide: se é só texto no início do contexto, não existe a separação que protege o SQL. O texto do exemplo é o mesmo prompt do Aurora Assist usado nos laboratórios (campus/dados.py).
+-->
+
+- O system prompt é o texto que o desenvolvedor coloca antes da conversa para definir papel e regras, como no Aurora Assist: "Responda sobre matrícula, prazos e declarações. Nunca forneça gabaritos nem provas antigas."
+- O aluno não o vê na tela, mas a aplicação o envia ao modelo em toda chamada, junto com o histórico e a pergunta, porque o modelo não guarda nada de uma chamada para outra.
+- O modelo foi treinado para dar mais peso a esse texto, mas isso é tendência, não trava: o system prompt não é uma configuração protegida, é só texto no início do contexto.
+
+---
+
 ## A barreira do SQL injection que o LLM não tem
 _conteúdo_
 
@@ -236,6 +250,20 @@ ROTEIRO: gancho: peça que alguém abra um dos links e cole a pergunta do tranca
 
 ---
 
+## Como o modelo lê e constrói o texto: um token de cada vez
+_conteúdo_
+
+<!--
+LAYOUT: duas etapas: à esquerda, o contexto virando tokens ligados entre si (leitura); à direita, a frase crescendo token a token, com barras de probabilidade para as próximas opções (escrita).
+ROTEIRO: gancho: pergunte de onde vem a resposta do modelo; muita gente imagina uma busca num banco de respostas. Mostre o laço: calcula, escolhe, acrescenta, repete. As datas do exemplo são as mesmas do Laboratório 1 e preparam o próximo slide, em que a mesma pergunta dá datas diferentes.
+-->
+
+- Para ler, o modelo converte o contexto inteiro em tokens e, com a atenção, relaciona cada um com os demais; é daí que vem a coerência da resposta.
+- Para escrever, ele calcula a probabilidade de cada token possível vir a seguir, escolhe um, acrescenta ao texto e repete até terminar a resposta.
+- Em "O prazo de trancamento é até", continuações como "15 de março" ou "22 de março" podem ser todas plausíveis; nada é consultado num banco de respostas certas, a menos que a aplicação coloque uma fonte no contexto.
+
+---
+
 ## Gerar é sortear: duas respostas para a mesma pergunta
 _conteúdo_
 
@@ -310,6 +338,20 @@ ROTEIRO: continuação de "WAF com regra de palavra não protege um LLM"; os doi
 -->
 
 - A injeção indireta chega dentro de um PDF, de um documento já indexado ou da saída de uma ferramenta: conteúdo que o WAF não interpreta ou que nem passa por ele.
+
+---
+
+## Por que o modelo alucina: plausível não é verdadeiro
+_conteúdo_
+
+<!--
+LAYOUT: uma frase fluente sendo gerada, com um selo "provável" aceso e um selo "verificado" apagado; ao lado, uma fonte oficial entrando pelo contexto como a saída para o problema.
+ROTEIRO: gancho: conecte com o slide de como o modelo constrói o texto: se ele só prevê a continuação provável, nada garante que ela seja verdadeira. O próximo slide traz o exemplo do DOI inventado, e o Laboratório 1 mostra que temperatura zero estabiliza a resposta sem torná-la correta.
+-->
+
+- Alucinar é produzir texto plausível sem base em fato: o modelo foi treinado para continuar textos de forma provável, não para verificar se o que escreve é verdade.
+- Ele também não tem um sinal confiável de "não sei": quando o dado é raro, ausente ou posterior ao treino, a continuação mais provável sai igualmente fluente e segura.
+- Temperatura baixa deixa a resposta mais estável, não mais verdadeira; o que reduz a alucinação é ancorar a resposta numa fonte e verificar o resultado fora do modelo.
 
 ---
 
