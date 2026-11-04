@@ -288,7 +288,7 @@ ROTEIRO: gancho: pergunte se "modelo aberto" significa modelo mais seguro, e use
 -->
 
 - Modelos de peso fechado, como GPT, Claude e Gemini, são acessados só por API: o fornecedor controla o ajuste de segurança, aplica patches e atualiza o comportamento, mas ninguém de fora audita os pesos internos.
-- Modelos de peso aberto, como Llama, Mistral e Qwen, podem ser inspecionados e hospedados localmente, o que dá controle total sobre dado e comportamento, mas transfere para quem hospeda a responsabilidade inteira pelo guardrail e pela atualização.
+- Modelos de peso aberto, como Llama, Mistral e Qwen, podem ser inspecionados e hospedados localmente (por exemplo com o Ollama, que roda o modelo na própria máquina, sem chave de API, e é a base dos trabalhos), o que dá controle total sobre dado e comportamento, mas transfere para quem hospeda a responsabilidade inteira pelo guardrail e pela atualização.
 - Os pesos de um modelo aberto são, eles mesmos, um artefato de terceiros: baixar e carregar um checkpoint é tão arriscado quanto instalar uma dependência de software, o que volta a aparecer como cadeia de suprimentos (LLM03) adiante.
 - Nenhuma das duas opções é "a segura": a escolha depende de quanto a equipe confia no fornecedor versus quanto ela está preparada para assumir a operação e a defesa por conta própria.
 
@@ -943,7 +943,7 @@ ROTEIRO: gancho: com matrículas sequenciais, trocar o número na URL expõe o h
 -->
 
 - A API do Histórico responde em `/historico/{matrícula}` com números sequenciais; ao trocar o número, um aluno com token válido lê o histórico escolar de outro.
-- O token prova quem é o usuário, mas não diz a que recurso ele tem direito; esse é o clássico problema de autorização por objeto, que o assistente só agrava ao fazer chamadas em nome de quem pergunta.
+- O token prova quem é o usuário, mas não diz a que recurso ele tem direito; esse é o clássico problema de autorização por objeto (IDOR, ou BOLA), que o assistente só agrava ao fazer chamadas em nome de quem pergunta. Ele não é item do Top 10 para LLMs: é o API1:2023 do OWASP API Security Top 10, outro documento da mesma família.
 - Se o modelo montar a URL a partir do texto do usuário, uma injeção pode apontar a chamada para qualquer matrícula, e o volume de consultas também custa dinheiro.
 - A defesa é verificar a autorização por recurso no servidor, usar identificadores não previsíveis, limitar a taxa e manter a sessão isolada por usuário.
 

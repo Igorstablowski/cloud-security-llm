@@ -401,7 +401,7 @@ ROTEIRO: gancho do slide: percorrer o checklist transforma intuição em evidên
 - Para entrada, prompt do sistema e modelo, pergunte se há separação de papéis e sanitização (LLM01), autenticação e limite de taxa (LLM10), se há segredo no prompt (LLM07) e se a origem do modelo foi verificada (LLM03).
 - Para saída, ferramentas e RAG, pergunte se a saída é tratada antes de uso (LLM05), se há menor privilégio e confirmação humana (LLM06) e se o índice isola quem pode ver o quê (LLM08).
 - Para monitoramento, verifique se existem registros, detecção de anomalia e red-teaming periódico.
-- Cada linha cruza componente, risco e controle; uma célula de controle vazia é um achado, não uma hipótese.
+- Cada linha cruza componente, risco e controle; marque cada célula como presente, ausente ou parcial (um controle que existe só em parte, como uma API que autentica mas não autoriza por objeto). Célula vazia ou parcial é um achado, não uma hipótese.
 
 ---
 
@@ -413,7 +413,7 @@ LAYOUT: cartão de achado com seis campos preenchidos como exemplo; ao lado, mat
 ROTEIRO: gancho do slide: um achado bem escrito é aquele que o desenvolvedor executa sem voltar a perguntar. Use o portal de orientação como exemplo e mostre uma recomendação ruim ("melhorar a segurança") ao lado de uma boa ("aplicar filtro de programa antes da busca no índice"). A matriz é a mesma do Laboratório 7: impacto e probabilidade de 1 a 3, multiplicados; 6 ou 9 é Alta, 3 ou 4 é Média, 1 ou 2 é Baixa.
 -->
 
-- Todo achado traz seis campos: descrição, componente afetado, categoria do OWASP 2025, cenário de exploração concreto, severidade e recomendação.
+- Todo achado traz seis campos: descrição, componente afetado, categoria do OWASP 2025, cenário de exploração concreto com evidência (a entrada usada, a saída obtida e um print ou trecho de código), severidade e recomendação. Se o problema não é do modelo, a categoria vem de outro documento OWASP, como o API1:2023 do API Security Top 10.
 - A severidade vem da matriz 3×3 de impacto por probabilidade: alto com médio ou alto (e médio com alto) é prioridade alta; alto com baixo, baixo com alto e médio com médio ficam em média; o que sobra é baixa, vai para o backlog e tem o risco residual aceito formalmente.
 - A recomendação precisa ser específica, ligada ao risco e executável por quem lê, sem exigir que o desenvolvedor volte a perguntar o que fazer.
 
@@ -489,6 +489,21 @@ ROTEIRO: gancho do slide: a avaliação do portal, agora automatizada: o script 
 - Passos: abra o sistema_exemplo.json e leia os componentes e controles declarados; rode o script, depois com --defesa, e leia os achados e o resumo; por fim, edite o inventário e rode de novo.
 - O que observar: quais controles ausentes viraram achados, como a severidade acompanha impacto e probabilidade e se o resumo seria compreensível por quem não conhece o vocabulário do OWASP.
 - Discussão: o que um script consegue e o que não consegue avaliar, e por que a revisão humana do inventário continua necessária.
+
+---
+
+## Os dois trabalhos: aplicar as Aulas 5 e 6 num sistema de verdade
+_conclusão_
+
+<!--
+LAYOUT: dois cartões lado a lado, "Trabalho 1 — atacar e documentar (Aula 5)" e "Trabalho 2 — avaliar e propor defesa (Aula 6)", e embaixo uma faixa com o app Campus Aurora e suas seis superfícies.
+ROTEIRO: gancho do slide: tudo o que os trabalhos pedem foi visto nas duas aulas; este slide só liga cada trabalho à aula de onde ele vem. Gaste uns 3 minutos aqui, tirados do encerramento. Mostre o app rodando, se der tempo, e reforce que lá o modelo é real: o mesmo ataque pode passar numa tentativa e falhar na outra, então registrar cada tentativa é parte do trabalho.
+-->
+
+- O Trabalho 1 aplica a Aula 5: construir um agente com uma função específica e tentar reproduzir contra ele os dez riscos do Top 10 2025, registrando a entrada, a saída e um print de cada tentativa, ou justificando tecnicamente por que um risco não se aplica àquela arquitetura.
+- O Trabalho 2 aplica a Aula 6: mapear as fronteiras de confiança, aplicar o STRIDE, preencher o inventário de controles (presente, ausente ou parcial) e redigir ao menos três achados com os seis campos e um guardrail localizado na arquitetura.
+- A base dos dois é o app Campus Aurora em trabalho_ollama/: as mesmas seis arquiteturas da Aula 5 (Aurora Assist, Acervo Aurora, Agenda Lab, Comitê de Bolsas, Notebook do grupo e API do Histórico), sem nenhuma defesa, falando com um modelo aberto hospedado localmente no Ollama.
+- A diferença para os laboratórios: lá o modelo era o SimLLM, previsível; nos trabalhos ele é real, então o mesmo ataque pode funcionar numa tentativa e falhar na outra (gerar é sortear), e é por isso que cada tentativa precisa ser registrada.
 
 ---
 
