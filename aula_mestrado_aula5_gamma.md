@@ -7,13 +7,14 @@ OWASP Top 10 para LLMs 2025 e superfícies de ataque por arquitetura), mas com t
 todos no universo fictício "Campus Aurora" (Aurora Assist, Acervo Aurora, Agenda Lab, Comitê de Bolsas, Notebook do
 grupo, API do Histórico). Dados 100% sintéticos; nenhuma relação com instituição real.
 
-Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 75 slides,
+Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 77 slides,
 conferido texto a texto contra este arquivo em 2026-11-04. Diferenças de estrutura, de propósito: no Gamma a
 abertura é a capa "Cyber Security & Governance" + o cartão "Cloud DevOps Security" do modelo FIAP, no lugar da capa
-abaixo; e os slides "Objetivos de aprendizagem", "Roteiro da aula" e "Um assistente no ar antes do parecer de risco"
-existem só aqui, não no deck.
+abaixo; e os slides "Objetivos de aprendizagem" e "Roteiro da aula"
+existem só aqui, não no deck. Os slides "Por que a AppSec tradicional não atende um LLM" e "A barreira do SQL
+injection que o LLM não tem" estão nos dois, logo depois do cartão "Cloud DevOps Security".
 
-Este arquivo tem 77 slides no total (1 capa + 76 de conteúdo; em 2026-11-04 os slides com mais texto foram divididos em dois, sem mudar o conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
+Este arquivo tem 78 slides no total (1 capa + 77 de conteúdo; em 2026-11-04 os slides com mais texto foram divididos em dois, sem mudar o conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
 cada tópico e cada risco do Top 10 ganhou, além do slide conceitual, um slide de exemplo concreto (transcrição de
 prompt e saída); o mapa de riscos também foi dividido em uma estação por slide. Ajuste o tempo de apresentação ao
 vivo conforme o ritmo da turma — nem todo slide de exemplo precisa de discussão longa.
@@ -90,18 +91,33 @@ Objetivo: entender o que o modelo lê, como gera, como foi treinado e por que in
 
 ---
 
-## Um assistente no ar antes do parecer de risco
+## Por que a AppSec tradicional não atende um LLM
 _introdução_
 
 <!--
-LAYOUT: três cartões lado a lado, um para cada motivo, com um ícone simples; uma faixa acima com "Aurora Assist" e as ações que ele realiza.
-ROTEIRO: gancho: o Aurora Assist atende milhares de alunos, consulta o sistema acadêmico e abre chamados, e foi ao ar antes de qualquer revisão de segurança. Pergunte à turma o que a revisão clássica teria checado, e então apresente os três motivos pelos quais ela não basta.
+LAYOUT: uma faixa no topo com o Aurora Assist e as ações que ele realiza; abaixo, três cartões lado a lado, um para cada motivo, com um ícone simples.
+ROTEIRO: gancho: o Aurora Assist atende milhares de alunos, consulta o sistema acadêmico e abre chamados, e foi ao ar antes de qualquer revisão de segurança. Pergunte à turma o que a revisão clássica de AppSec teria checado (injeção, validação de entrada, autenticação) e então apresente os três motivos pelos quais ela não basta. O próximo slide aprofunda o primeiro motivo com a barreira do SQL injection.
 -->
 
 - O Aurora Assist responde a milhares de alunos, consulta o sistema acadêmico e abre chamados, e entrou em produção antes de qualquer revisão de segurança específica para modelos de linguagem.
-- Primeiro motivo: instrução e dado chegam no mesmo texto, então não existe a fronteira que um parser ou uma consulta parametrizada oferece em sistemas tradicionais.
-- Segundo motivo: um filtro compara grafias, enquanto o modelo entende sentido, de modo que a mesma intenção reaparece em outro idioma ou com outras palavras.
-- Terceiro motivo: surgem peças novas (modelo, base de conhecimento, ferramentas, agentes) que o appsec clássico nunca mapeou. Esta aula percorre cada uma.
+- A AppSec tradicional parte de uma separação: código de um lado, dado do outro, e cada entrada validada pelo formato esperado. Num LLM, instrução e dado chegam no mesmo texto.
+- Um filtro compara grafias, enquanto o modelo entende sentido: a mesma intenção reaparece em outro idioma ou com outras palavras, e uma regra de WAF por palavra não acompanha.
+- Surgem peças que a AppSec clássica nunca mapeou: o modelo, a base de conhecimento, as ferramentas e os agentes. Esta aula percorre cada uma.
+
+---
+
+## A barreira do SQL injection que o LLM não tem
+_conteúdo_
+
+<!--
+LAYOUT: duas colunas. À esquerda, "Banco de dados": a consulta parametrizada com o campo ? e o valor do aluno entrando por um canal separado, uma parede entre os dois. À direita, "LLM": prompt do sistema, pergunta do aluno e edital fundidos numa única faixa de tokens, sem parede.
+ROTEIRO: gancho: pergunte como a turma se defende de SQL injection hoje e chegue à consulta parametrizada (prepared statement). O ponto é que ela não depende de adivinhar o ataque: a separação entre comando e dado é garantida pela construção. Mostre que o LLM não tem esse campo separado e que os papéis system/user ajudam, mas são aprendidos, não garantidos. Antecipe o edital com a nota invisível, que aparece adiante no bloco, e o Laboratório 2.
+-->
+
+- Contra SQL injection existe uma barreira estrutural: na consulta parametrizada `SELECT situacao FROM matricula WHERE aluno = ?`, o valor digitado vai num campo separado e nunca é executado como comando.
+- Se o aluno digita `A-1001' OR '1'='1`, o banco procura uma matrícula com esse nome estranho e não acha nada: o ataque morre na separação, não na esperteza de um filtro.
+- No LLM não existe esse campo: o prompt do sistema, a pergunta do aluno e o edital viram uma única sequência de tokens, e uma frase do edital pode dar ordens como a do desenvolvedor.
+- Papéis como system e user ajudam, mas são uma convenção que o modelo aprendeu, não uma barreira garantida; por isso a defesa vai para fora do modelo, como mostram o Laboratório 2 e a Aula 6.
 
 ---
 
