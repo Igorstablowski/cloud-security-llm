@@ -9,9 +9,14 @@ Padrão dos bullets: prosa corrida, 3 a 4 por slide, sem matemática pesada, exe
 Mantidos: PT-BR, segurança defensiva, OWASP sempre 2025 (documento padrão de conscientização, nunca "framework"),
 STRIDE adaptado a LLM (ver Aula 6), diagramas nativos do Gamma (nunca ASCII), sem emoji.
 
-Como usar no Gamma: este .md é copiado para dentro do deck "Segurança em LLMs" (mesma capa e tema das Aulas 5/6);
-o conteúdo abaixo substitui o corpo do deck copiado. Os comentários LAYOUT/ROTEIRO são notas para quem apresenta —
-o Gamma os ignora na importação.
+Deck no Gamma: "Cloud DevOps Security - Trabalho 2"
+(https://gamma.app/docs/Cloud-DevOps-Security-Trabalho-2-uu6jlvjvwn7dj2v), tema Blue Steel, o mesmo das Aulas
+5/6. Ordem no deck: capa "Cyber Security & Governance" e cartão "Cloud DevOps Security" (com o autor) do modelo
+FIAP; os cartões deste arquivo a partir do título; e o cartão final "Material Didático — Uso Restrito". No Gamma,
+o cartão de título traz só "Trabalho prático 2 · Segurança em LLMs · 2026", porque o autor já aparece no cartão
+"Cloud DevOps Security". Todo cartão de conteúdo tem imagem lateral gerada a partir do próprio texto.
+Ao mudar o texto aqui, replique no deck (e vice-versa).
+Os comentários LAYOUT/ROTEIRO são notas para quem apresenta — não existem no Gamma.
 -->
 
 ---
@@ -83,7 +88,7 @@ ROTEIRO: os mesmos comandos do Trabalho 1; se a turma já fez o Trabalho 1, este
 -->
 
 - Copie o arquivo de exemplo de variáveis: `cp .env.example .env` dentro da pasta `trabalho_ollama/`.
-- Suba os serviços com `docker compose up --build` e aguarde o download do modelo na primeira execução.
+- Suba os serviços com `docker compose up --build` e aguarde o download dos modelos na primeira execução (cerca de 2,3 GB no total).
 - Acesse `http://localhost:8020` e percorra a página inicial, que lista as seis superfícies com um resumo de uma linha de cada uma.
 - Tenha o código-fonte das seis superfícies aberto ao lado do navegador: o mapeamento combina o que você observa rodando com o que você lê no código.
 
