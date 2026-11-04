@@ -118,7 +118,19 @@ ROTEIRO: relembre rapidamente o que cada letra do STRIDE significa e como ela fo
 -->
 
 - Para cada superfície, verifique se alguma das seis categorias do STRIDE se aplica: falsificação de identidade, adulteração, repúdio, divulgação de informação, negação de serviço, elevação de privilégio.
-- Relacione cada ocorrência encontrada a um ou mais códigos do OWASP Top 10 para LLMs 2025, do mesmo jeito que foi feito no slide de STRIDE da Aula 6. Um item pode não ser do Top 10 para LLMs: a autorização por objeto da API do Histórico, por exemplo, é o API1:2023 do OWASP API Security Top 10.
+- Relacione cada ocorrência encontrada a um ou mais códigos do OWASP Top 10 para LLMs 2025, do mesmo jeito que foi feito no slide de STRIDE da Aula 6.
+- Um item pode não ser do Top 10 para LLMs: a autorização por objeto da API do Histórico, por exemplo, é o API1:2023 do OWASP API Security Top 10.
+
+---
+
+## Passo 3 — Registre as ausências e aponte a evidência
+_conteúdo_
+
+<!--
+LAYOUT: uma superfície do app com algumas categorias do STRIDE marcadas e outras explicitamente riscadas como "não se aplica"; cada marca ligada a uma linha de código ou tela.
+ROTEIRO: gancho: o STRIDE não é para preencher todas as letras; é para justificar cada uma, presente ou ausente, com uma evidência apontável.
+-->
+
 - Nem toda superfície vai ter as seis categorias presentes; registre também as ausências, que também são informação relevante para o relatório.
 - Evite generalizar: cada ocorrência deve apontar para uma linha de código, uma tela ou um fluxo específico, não para uma afirmação genérica sobre "risco de LLM".
 
@@ -135,7 +147,20 @@ ROTEIRO: gancho do slide: a célula vazia é o achado — é para isso que o inv
 - Monte uma grade com as seis superfícies de um lado e os cinco controles da Aula 6 do outro: validação de entrada, validação de saída, menor privilégio, guardrails e monitoramento.
 - Marque cada célula como presente, ausente ou parcial, com uma frase curta de justificativa baseada no código ou no comportamento observado.
 - As células vazias ou parciais são a matéria-prima dos seus achados: cada uma delas deve virar, no mínimo, uma linha de recomendação.
-- O app fornecido não tem defesas de propósito: espere uma grade quase toda vazia. O valor do inventário está na justificativa de cada célula e em dizer, para cada superfície, qual ausência é a mais grave. Onde algo existe só em parte (a API do Histórico autentica, mas não autoriza por objeto), marque como parcial e explique.
+
+---
+
+## Passo 4 — O que esperar da grade deste app
+_conteúdo_
+
+<!--
+LAYOUT: a grade de controles quase toda vazia, com uma única célula "parcial" destacada na linha da API do Histórico.
+ROTEIRO: gancho: avise que a grade vazia é esperada, porque o app foi feito sem defesas; o trabalho está em justificar e priorizar, não em achar controles que não existem.
+-->
+
+- O app fornecido não tem defesas de propósito: espere uma grade quase toda vazia.
+- O valor do inventário está na justificativa de cada célula e em dizer, para cada superfície, qual ausência é a mais grave.
+- Onde algo existe só em parte (a API do Histórico autentica, mas não autoriza por objeto), marque como parcial e explique.
 
 ---
 
