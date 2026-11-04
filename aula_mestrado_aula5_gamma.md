@@ -7,14 +7,14 @@ OWASP Top 10 para LLMs 2025 e superfícies de ataque por arquitetura), mas com t
 todos no universo fictício "Campus Aurora" (Aurora Assist, Acervo Aurora, Agenda Lab, Comitê de Bolsas, Notebook do
 grupo, API do Histórico). Dados 100% sintéticos; nenhuma relação com instituição real.
 
-Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 135 slides,
+Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 134 slides,
 conferido texto a texto contra este arquivo em 2026-11-04. Diferenças de estrutura, de propósito: no Gamma a
 abertura é a capa "Cyber Security & Governance" + o cartão "Cloud DevOps Security" do modelo FIAP, no lugar da capa
 abaixo; e os slides "Objetivos de aprendizagem" e "Roteiro da aula"
 existem só aqui, não no deck. Os slides "Por que a AppSec tradicional não atende um LLM" e "A barreira do SQL
 injection que o LLM não tem" estão nos dois, logo depois do cartão "Cloud DevOps Security".
 
-Este arquivo tem 138 slides no total (1 capa + 137 de conteúdo; desde 2026-11-04 todo slide com 4 parágrafos ou mais é dividido em dois; em 2026-11-04 os slides com mais texto foram divididos em dois, sem mudar o conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
+Este arquivo tem 137 slides no total (1 capa + 136 de conteúdo; desde 2026-11-04 todo slide com 4 parágrafos ou mais é dividido em dois; em 2026-11-04 os slides com mais texto foram divididos em dois, sem mudar o conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
 cada tópico e cada risco do Top 10 ganhou, além do slide conceitual, um slide de exemplo concreto (transcrição de
 prompt e saída); o mapa de riscos também foi dividido em uma estação por slide. Ajuste o tempo de apresentação ao
 vivo conforme o ritmo da turma — nem todo slide de exemplo precisa de discussão longa.
@@ -135,7 +135,7 @@ ROTEIRO: continuação de "Por que a AppSec tradicional não atende um LLM"; os 
 -->
 
 - Um filtro compara grafias, enquanto o modelo entende sentido: a mesma intenção reaparece em outro idioma ou com outras palavras, e uma regra de WAF por palavra não acompanha.
-- Surgem peças que a AppSec clássica nunca mapeou: o modelo, a base de conhecimento, as ferramentas e os agentes. Esta aula percorre cada uma.
+- Surgem peças que a AppSec clássica nunca mapeou: o modelo, a base de conhecimento, as ferramentas e os agentes.
 
 ---
 
@@ -149,7 +149,7 @@ ROTEIRO: gancho: pergunte como a turma se defende de SQL injection hoje e chegue
 
 - Contra SQL injection existe uma barreira estrutural: na consulta parametrizada `SELECT situacao FROM matricula WHERE aluno = ?`, o valor digitado vai num campo separado e nunca é executado como comando.
 - Se o aluno digita `A-1001' OR '1'='1`, o banco procura uma matrícula com esse nome estranho e não acha nada: o ataque morre na separação, não na esperteza de um filtro.
-- No LLM não existe esse campo: o prompt do sistema, a pergunta do aluno e o edital viram uma única sequência de tokens, e uma frase do edital pode dar ordens como a do desenvolvedor.
+- No LLM não existe essa divisão: o prompt do sistema, a pergunta do aluno e o edital viram uma única sequência de tokens, e uma frase do edital pode dar ordens como a do desenvolvedor.
 
 ---
 
@@ -203,19 +203,6 @@ ROTEIRO: gancho: faça a turma contar à mão quantos "pedaços" caberiam na fra
 
 ---
 
-## Calculando na prática: do edital à conta do mês
-_conteúdo_
-
-<!--
-LAYOUT: um edital de bolsa estilizado com um contador de tokens ao lado, multiplicado por um calendário de consultas por dia, terminando num medidor de custo.
-ROTEIRO: gancho: leve a conta do slide anterior para a escala de um sistema real. A faixa de 500 a 700 tokens vem da proporção medida na ementa (de 1,3 a 1,8 token por palavra em português, conforme o tokenizador), mostrada logo adiante.
--->
-
-- Um edital inteiro de bolsa, com umas 400 palavras, soma algo entre 500 e 700 tokens em português, conforme o tokenizador (a ementa medida no próximo slide dá de 1,3 a 1,8 token por palavra).
-- É o mesmo motivo pelo qual o Laboratório 1 mede tokens em vez de contar palavras: cada token consumido é orçamento de contexto e de centavos, e por isso o consumo sem limite (LLM10, adiante no Bloco 2) também é uma questão de segurança.
-
----
-
 ## Resultado do teste: os mesmos textos num tokenizador real
 _conteúdo_
 
@@ -233,7 +220,6 @@ ROTEIRO: gancho: mostre a tabela e destaque duas leituras: o inglês fica igual 
 | A palavra "vulnerabilidade", digitada sozinha | 15 | 3 tokens (v · ulner · abilidade) | 3 tokens |
 
 - O inglês dá o mesmo número nos dois tokenizadores; o português melhora no mais novo, mas continua custando mais: a ementa vai de 28 tokens em inglês para 38 a 53 em português.
-- O tokenizador de brinquedo do Laboratório 1 conta 61 tokens contra 28 para a mesma ementa: ele exagera de propósito, para o efeito ficar visível. Os números reais estão nesta tabela.
 
 ---
 
@@ -298,7 +284,7 @@ ROTEIRO: continuação de "Bloquear a palavra não bloqueia a intenção"; os do
 -->
 
 - Uma lista de bloqueio casa sequências de caracteres; o modelo opera sobre sentido, e por isso o conjunto de reformulações possíveis é grande demais para enumerar.
-- Lista de bloqueio serve como camada barata contra abuso casual, nunca como controle principal; o Laboratório 2 mostra o filtro sendo contornado e depois combinado com outras defesas.
+- Lista de bloqueio serve como camada barata contra abuso casual, nunca como controle principal.
 
 ---
 
@@ -315,7 +301,7 @@ ROTEIRO: gancho: pergunte quem na turma confia no WAF da empresa para barrar ata
 
 ---
 
-## O que o WAF não vê, e para que ele ainda serve
+## O que o Firewall de palavras não vê.
 _conteúdo_
 
 <!--
@@ -324,7 +310,6 @@ ROTEIRO: continuação de "WAF com regra de palavra não protege um LLM"; os doi
 -->
 
 - A injeção indireta chega dentro de um PDF, de um documento já indexado ou da saída de uma ferramenta: conteúdo que o WAF não interpreta ou que nem passa por ele.
-- O WAF continua útil para o que já faz, como limite de taxa e bloqueio de bots; contra injeção, a defesa fica em volta do modelo: separar papéis, limitar privilégios e validar a saída.
 
 ---
 
@@ -376,7 +361,6 @@ ROTEIRO: continuação de "Da língua ao comportamento: as três etapas de trein
 -->
 
 - O RLHF treina o modelo a preferir, entre várias respostas possíveis, as que humanos avaliaram como boas e seguras — é aqui que nascem a maioria das recusas que conhecemos.
-- As três etapas moldam tendência estatística, não regra fixa; a próxima observação mostra o que isso significa na prática.
 
 ---
 
@@ -480,7 +464,7 @@ ROTEIRO: continuação de "Guardrail de verdade: uma camada a mais, não uma gar
 -->
 
 - Ambos são uma melhoria real sobre confiar só na recusa aprendida do modelo principal, porque colocam uma verificação independente fora do fluxo de geração.
-- Ainda assim, um classificador também é um modelo e também erra para os dois lados, deixando passar o que deveria barrar e barrando o que era inofensivo; a Aula 6 retoma esse limite com mais profundidade.
+- Ainda assim, um classificador também é um modelo e também erra para os dois lados, deixando passar o que deveria barrar e barrando o que era inofensivo.
 
 ---
 
