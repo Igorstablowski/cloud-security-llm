@@ -53,7 +53,7 @@ def _get(url, caminho):
 
 def url_do_ollama():
     """Devolve a primeira URL em que o Ollama responde com o modelo baixado. Fixe `OLLAMA_URL` se
-    houver mais de um Ollama, ou um túnel, nessas portas: o texto vai para quem responder aqui."""
+    houver mais de um Ollama nessas portas (no primeiro boot o container ainda não tem o modelo)."""
     for url in URLS:
         try:
             if any(m["name"] == MODELO for m in _get(url, "/api/tags")["models"]):
