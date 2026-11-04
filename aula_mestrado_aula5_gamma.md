@@ -7,13 +7,13 @@ OWASP Top 10 para LLMs 2025 e superfícies de ataque por arquitetura), mas com t
 todos no universo fictício "Campus Aurora" (Aurora Assist, Acervo Aurora, Agenda Lab, Comitê de Bolsas, Notebook do
 grupo, API do Histórico). Dados 100% sintéticos; nenhuma relação com instituição real.
 
-Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 66 slides,
+Deck no Gamma: "FIAP - Cloud DevOps Security - Aula 5" (https://gamma.app/docs/7mtk1jnn6a24nlm), 67 slides,
 conferido texto a texto contra este arquivo em 2026-11-04. Diferenças de estrutura, de propósito: no Gamma a
 abertura é a capa "Cyber Security & Governance" + o cartão "Cloud DevOps Security" do modelo FIAP, no lugar da capa
 abaixo; e os slides "Objetivos de aprendizagem", "Roteiro da aula" e "Um assistente no ar antes do parecer de risco"
 existem só aqui, não no deck.
 
-Este arquivo tem 68 slides no total (1 capa + 67 de conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
+Este arquivo tem 69 slides no total (1 capa + 68 de conteúdo). O deck cresceu em relação à versão anterior (42 slides / ~3h40) porque
 cada tópico e cada risco do Top 10 ganhou, além do slide conceitual, um slide de exemplo concreto (transcrição de
 prompt e saída); o mapa de riscos também foi dividido em uma estação por slide. Ajuste o tempo de apresentação ao
 vivo conforme o ritmo da turma — nem todo slide de exemplo precisa de discussão longa.
@@ -125,13 +125,36 @@ _conteúdo_
 
 <!--
 LAYOUT: cálculo em destaque com a frase de exemplo dividida em pedaços coloridos (tokens) e um contador ao lado; abaixo, a mesma frase em inglês com menos pedaços.
-ROTEIRO: gancho: faça a turma contar à mão quantos "pedaços" caberiam na frase de exemplo antes de revelar a estimativa. Todos os números deste slide são faixas aproximadas, não contagens de um tokenizador específico; o objetivo é sentir a ordem de grandeza, não decorar uma fórmula. O tokenizador de brinquedo do Laboratório 1 exagera a diferença de propósito, e o script avisa isso.
+ROTEIRO: gancho: faça a turma contar à mão quantos "pedaços" caberiam na frase de exemplo antes de revelar a estimativa. Os números deste slide foram medidos (o próximo slide mostra o teste e os links para a turma repetir); o objetivo é sentir a ordem de grandeza e ver que ela depende do tokenizador, não decorar uma fórmula. O tokenizador de brinquedo do Laboratório 1 exagera a diferença de propósito, e o script avisa isso.
 -->
 
-- A pergunta "Qual o prazo de trancamento da disciplina de Segurança de Sistemas?" tem 67 caracteres; a regra prática de uns quatro caracteres por token (pensada para o inglês) daria perto de 17, e em português o resultado real costuma ficar acima disso, porque palavras com acento e menos frequentes no treino são cortadas em mais pedaços.
-- A versão em inglês, "What is the deadline to withdraw from the Systems Security course?", tem quase o mesmo tamanho, mas costuma render menos tokens: palavras comuns do inglês tendem a ser um token inteiro. O que pesa não é o número de letras, é o quanto o vocabulário do tokenizador conhece aquela língua.
-- Um edital inteiro de bolsa, com umas 400 palavras, pode somar algo entre 600 e 900 tokens em português, conforme o tokenizador; multiplicado por centenas de consultas por dia, a diferença de idioma vira diferença real de custo e de espaço na janela de contexto.
+- A pergunta "Qual o prazo de trancamento da disciplina de Segurança de Sistemas?" tem 67 caracteres; a regra prática de uns quatro caracteres por token (pensada para o inglês) daria perto de 17. Medida de verdade, ela dá 19 tokens no tokenizador do GPT-4 e 14 no do GPT-4o, que conhece melhor o português: palavras menos frequentes no treino, como "trancamento", ainda são cortadas em pedaços.
+- A versão em inglês, "What is the deadline to withdraw from the Systems Security course?", tem quase o mesmo tamanho e dá 12 tokens nos dois tokenizadores: cada palavra comum do inglês é um token inteiro. O que pesa não é o número de letras, é o quanto o vocabulário do tokenizador conhece aquela língua.
+- Um edital inteiro de bolsa, com umas 400 palavras, soma algo entre 500 e 700 tokens em português, conforme o tokenizador (a ementa medida no próximo slide dá de 1,3 a 1,8 token por palavra); multiplicado por centenas de consultas por dia, a diferença de idioma vira diferença real de custo e de espaço na janela de contexto.
 - É o mesmo motivo pelo qual o Laboratório 1 mede tokens em vez de contar palavras: cada token consumido é orçamento de contexto e de centavos, e por isso o consumo sem limite (LLM10, adiante no Bloco 2) também é uma questão de segurança.
+
+---
+
+## Resultado do teste: os mesmos textos num tokenizador real
+_conteúdo_
+
+<!--
+LAYOUT: tabela nativa do Gamma com as cinco linhas e as quatro colunas abaixo, ocupando a largura do cartão; embaixo, dois botões/links lado a lado para as duas calculadoras.
+ROTEIRO: gancho: mostre a tabela e peça que alguém abra um dos dois links e cole a pergunta do trancamento ao vivo; o número tem que bater. Destaque três leituras: o inglês fica igual nos dois tokenizadores; o português cai de 53 para 38 tokens na ementa no tokenizador mais novo; e o tokenizador de brinquedo do Laboratório 1 (61 contra 28) exagera de propósito. Contagem medida em 2026-11-04 com a biblioteca tiktoken, que usa os mesmos tokenizadores dos dois sites; Claude, Llama e outros têm tokenizadores próprios e dão números diferentes.
+-->
+
+| Texto | Caracteres | GPT-4o (o200k_base) | GPT-4 (cl100k_base) |
+|---|---|---|---|
+| Pergunta do trancamento, em português | 67 | 14 tokens | 19 tokens |
+| A mesma pergunta, em inglês | 66 | 12 tokens | 12 tokens |
+| Parágrafo de ementa, em português (30 palavras) | 212 | 38 tokens | 53 tokens |
+| O mesmo parágrafo, em inglês (25 palavras) | 189 | 28 tokens | 28 tokens |
+| A palavra "vulnerabilidade" | 15 | 3 tokens (v · ulner · abilidade) | 3 tokens |
+
+- O inglês dá o mesmo número nos dois tokenizadores; o português melhora no mais novo, mas continua custando mais: a ementa vai de 28 tokens em inglês para 38 a 53 em português.
+- O tokenizador de brinquedo do Laboratório 1 conta 61 tokens contra 28 para a mesma ementa: ele exagera de propósito, para o efeito ficar visível. Os números reais estão nesta tabela.
+- Teste você mesmo: OpenAI Tokenizer (https://platform.openai.com/tokenizer), oficial, para os tokenizadores do GPT; e Tiktokenizer (https://tiktokenizer.vercel.app), que mostra os tokens coloridos e deixa escolher o tokenizador.
+- Outros modelos, como Claude e Llama, usam tokenizadores próprios e dão contagens diferentes; ao citar um número de tokens, diga sempre qual tokenizador mediu.
 
 ---
 
