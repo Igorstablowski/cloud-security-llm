@@ -84,21 +84,26 @@ def _extrair_json(texto: str) -> dict | None:
     return objeto if isinstance(objeto, dict) else None
 
 
-def _snapshot() -> dict:
+def _snapshot(usuario: str) -> dict:
+    """Retorna apenas chamados pertencentes ao usuario simulado."""
     with _lock:
-        return {str(chamado_id): dict(dados) for chamado_id, dados in _chamados.items()}
+        return {
+            str(chamado_id): dict(dados)
+            for chamado_id, dados in _chamados.items()
+            if dados["solicitante"] == usuario
+        }
 
 
 def _rodar_agente(pedido: str, usuario: str, max_passos: int = 4) -> dict:
-    """Ciclo pensar -> agir -> observar (intencionalmente sem autorização)."""
+    """Ciclo pensar -> agir -> observar; autorizacao aplicada nas ferramentas."""
     global _proximo_id
 
     def consultar_chamado(id: int) -> str:
         # VULN LLM02/LLM06: não verifica se usuario é dono do chamado.
         with _lock:
             chamado = _chamados.get(int(id))
-            if chamado is None:
-                return f"Chamado {id} não encontrado."
+            if chamado is None or chamado["solicitante"] != usuario:
+                return "Chamado não encontrado ou acesso não autorizado."
             return json.dumps({"id": int(id), **chamado}, ensure_ascii=False)
 
     def abrir_chamado(titulo: str, descricao: str) -> str:
@@ -121,8 +126,8 @@ def _rodar_agente(pedido: str, usuario: str, max_passos: int = 4) -> dict:
             return "Status inválido. Use: aberto, em andamento ou resolvido."
         with _lock:
             chamado = _chamados.get(int(id))
-            if chamado is None:
-                return f"Chamado {id} não encontrado."
+            if chamado is None or chamado["solicitante"] != usuario:
+                return "Chamado não encontrado ou acesso não autorizado."
             chamado["status"] = novo_status
             return f"Chamado {id} alterado para '{novo_status}'."
 
@@ -197,7 +202,7 @@ def service_desk_page(request: Request):
             "vuln_note": (
                 "Experimento autorizado: entre como 'visitante' e tente consultar ou "
                 "alterar o chamado 101, pertencente a outra pessoa. "
-                "A identificação é simulada, sem autenticação real."
+                "O backend verifica o titular, mas a identidade ainda e simulada (sem login real)."
             ),
             "fields": [
                 {"name": "usuario", "label": "Usuário simulado", "type": "text", "value": "visitante"},
@@ -211,6 +216,8 @@ def service_desk_page(request: Request):
 
 @router.post("/surfaces/service-desk")
 def service_desk_api(payload: ServiceDeskIn):
-    resultado = _rodar_agente(payload.pedido, payload.usuario.strip() or "visitante")
-    resultado["chamados_atuais"] = _snapshot()
+    # Identidade de laboratorio controlada pelo usuario: nao e autenticacao real.
+    usuario = payload.usuario.strip().lower() or "visitante"
+    resultado = _rodar_agente(payload.pedido, usuario)
+    resultado["chamados_atuais"] = _snapshot(usuario)
     return resultado
