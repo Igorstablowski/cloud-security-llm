@@ -3,7 +3,7 @@ FROM python:3.11-slim
 WORKDIR /code
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade "pip>=26.2" "setuptools>=84.1.0" && python -m pip install --no-cache-dir -r requirements.txt
 
 COPY . /code/app
 
