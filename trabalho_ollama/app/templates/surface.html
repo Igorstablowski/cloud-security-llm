@@ -12,7 +12,9 @@
   <form id="surface-form">
     {% for f in fields %}
       <label for="{{ f.name }}">{{ f.label }}</label>
-      {% if f.type == "textarea" %}
+      {% if f.type == "checkbox" %}
+        <input type="checkbox" id="{{ f.name }}" name="{{ f.name }}" value="true" style="width:auto">
+      {% elif f.type == "textarea" %}
         <textarea id="{{ f.name }}" name="{{ f.name }}" placeholder="{{ f.placeholder or '' }}">{{ f.value or '' }}</textarea>
       {% else %}
         <input type="text" id="{{ f.name }}" name="{{ f.name }}" placeholder="{{ f.placeholder or '' }}" value="{{ f.value or '' }}">

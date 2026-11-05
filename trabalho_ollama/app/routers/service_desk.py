@@ -71,6 +71,8 @@ Não invente resultados: use as observações retornadas pelas ferramentas.
 class ServiceDeskIn(BaseModel):
     usuario: str = Field(default="visitante", max_length=40)
     pedido: str = Field(min_length=1, max_length=3000)
+    autorizar_alteracoes: bool = False
+    autorizar_abertura: bool = False
 
 
 def _extrair_json(texto: str) -> dict | None:
@@ -94,9 +96,16 @@ def _snapshot(usuario: str) -> dict:
         }
 
 
-def _rodar_agente(pedido: str, usuario: str, max_passos: int = 4) -> dict:
+def _rodar_agente(pedido: str, usuario: str, max_passos: int = 4, autorizar_alteracoes: bool = False, autorizar_abertura: bool = False) -> dict:
     """Ciclo pensar -> agir -> observar; autorizacao aplicada nas ferramentas."""
     global _proximo_id
+
+    # Somente uma solicitacao explicita pode autorizar a alteracao.
+    permissao = re.fullmatch(
+        r"\s*(?:atualize|altere|mude)\s+(?:o\s+status\s+do\s+|o\s+)?chamado\s+(\d+)\s+(?:para|como)\s+(aberto|em\s+andamento|resolvido)\s*[.!]?\s*",
+        pedido,
+        flags=re.IGNORECASE,
+    )
 
     def consultar_chamado(id: int) -> str:
         # VULN LLM02/LLM06: não verifica se usuario é dono do chamado.
@@ -108,6 +117,16 @@ def _rodar_agente(pedido: str, usuario: str, max_passos: int = 4) -> dict:
 
     def abrir_chamado(titulo: str, descricao: str) -> str:
         global _proximo_id
+
+        pedido_de_abertura = re.match(
+            r"^\s*(?:abra|crie|registre)\s+(?:(?:um|novo)\s+){0,2}chamado\b",
+            pedido,
+            flags=re.IGNORECASE,
+        )
+
+        if not (autorizar_abertura and pedido_de_abertura):
+            return "Abertura negada: pedido explicito e autorizacao obrigatorios."
+
         with _lock:
             novo_id = _proximo_id
             _proximo_id += 1
@@ -122,6 +141,13 @@ def _rodar_agente(pedido: str, usuario: str, max_passos: int = 4) -> dict:
     def atualizar_status(id: int, status: str) -> str:
         # VULN LLM06: não verifica o titular nem exige confirmação.
         novo_status = str(status).strip().lower()
+        if (
+            not autorizar_alteracoes
+            or permissao is None
+            or int(id) != int(permissao.group(1))
+            or novo_status != " ".join(permissao.group(2).lower().split())
+        ):
+            return "Alteracao negada: autorizacao explicita para este chamado e status obrigatoria."
         if novo_status not in _status_permitidos:
             return "Status inválido. Use: aberto, em andamento ou resolvido."
         with _lock:
@@ -205,6 +231,8 @@ def service_desk_page(request: Request):
                 "O backend verifica o titular, mas a identidade ainda e simulada (sem login real)."
             ),
             "fields": [
+                {"name": "autorizar_abertura", "label": "Autorizo criar um chamado", "type": "checkbox"},
+                {"name": "autorizar_alteracoes", "label": "Autorizo alterações nos meus chamados", "type": "checkbox"},
                 {"name": "usuario", "label": "Usuário simulado", "type": "text", "value": "visitante"},
                 {"name": "pedido", "label": "Pedido ao Aurora Service Desk", "type": "textarea",
                  "placeholder": "Ex.: consulte o chamado 101 e informe o status."},
@@ -218,6 +246,6 @@ def service_desk_page(request: Request):
 def service_desk_api(payload: ServiceDeskIn):
     # Identidade de laboratorio controlada pelo usuario: nao e autenticacao real.
     usuario = payload.usuario.strip().lower() or "visitante"
-    resultado = _rodar_agente(payload.pedido, usuario)
+    resultado = _rodar_agente(payload.pedido, usuario, autorizar_alteracoes=payload.autorizar_alteracoes, autorizar_abertura=payload.autorizar_abertura)
     resultado["chamados_atuais"] = _snapshot(usuario)
     return resultado
