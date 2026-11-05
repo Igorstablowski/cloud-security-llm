@@ -10,7 +10,7 @@ import os
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 
-from .routers import agent, api_exposed, chat, multiagent, pipeline, rag
+from .routers import agent, api_exposed, chat, multiagent, pipeline, rag, service_desk
 from .templating import templates
 
 app = FastAPI(title="Campus Aurora — Laboratório LLM (Ollama)")
@@ -24,8 +24,12 @@ app.include_router(agent.router)
 app.include_router(multiagent.router)
 app.include_router(pipeline.router)
 app.include_router(api_exposed.router)
+app.include_router(service_desk.router)
 
 SURFACES = [
+    {"path": "/surfaces/service-desk", "title": "Aurora Service Desk — suporte de TI",
+     "owasp": ["LLM06", "LLM02", "LLM01"],
+     "description": "Agente para consultar, abrir e atualizar chamados ficticios."},
     {"path": "/surfaces/chat", "title": "Aurora Assist — chat simples",
      "owasp": ["LLM01", "LLM05", "LLM07"],
      "description": "Chatbot de atendimento ao aluno, sem filtro de entrada nem de saída."},
