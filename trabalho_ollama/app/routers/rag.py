@@ -37,6 +37,16 @@ def _carregar_acervo() -> list[dict]:
             continue
         with open(os.path.join(DATA_DIR, nome), encoding="utf-8") as fh:
             texto = fh.read()
+        # FILTRO_LLM08_PUBLICO: somente documentos publicos.
+        status_linhas = [
+            linha.split(":", 1)[1].strip().casefold()
+            for linha in texto.splitlines()
+            if linha.strip().casefold().startswith("status:")
+        ]
+
+        if status_linhas != ["público"]:
+            continue
+
         emb = ollama_client.embed(texto)
         docs.append({"nome": nome, "texto": texto, "embedding": emb})
     # Só guarda o índice se TODOS os embeddings saíram. Se o Ollama ainda estava
