@@ -12,6 +12,8 @@ VULN: LLM01 (Prompt Injection indireta) — a tese sob embargo contém uma linha
 texto recuperado entra no contexto como se fosse confiável, o modelo obedece.
 """
 import os
+import hashlib
+import json
 
 import numpy as np
 from fastapi import APIRouter, Request
@@ -32,11 +34,26 @@ def _carregar_acervo() -> list[dict]:
     if _docs is not None:
         return _docs
     docs = []
+    with open(
+        os.path.join(os.path.dirname(os.path.dirname(__file__)), "hashes_acervo.json"),
+        encoding="utf-8"
+    ) as fh:
+        hashes_confiaveis = json.load(fh)
     for nome in sorted(os.listdir(DATA_DIR)):
         if not nome.endswith(".txt"):
             continue
-        with open(os.path.join(DATA_DIR, nome), encoding="utf-8") as fh:
-            texto = fh.read()
+        # CONTROLE_INTEGRIDADE_LLM04
+        caminho = os.path.join(DATA_DIR, nome)
+        with open(caminho, "rb") as fh:
+            conteudo = fh.read()
+
+        hash_atual = hashlib.sha256(conteudo).hexdigest().upper()
+
+        if hash_atual != hashes_confiaveis.get(nome, "").upper():
+            print(f"[RAG] Integridade reprovada: {nome}", flush=True)
+            continue
+
+        texto = conteudo.decode("utf-8")
         # FILTRO_LLM08_PUBLICO: somente documentos publicos.
         status_linhas = [
             linha.split(":", 1)[1].strip().casefold()
