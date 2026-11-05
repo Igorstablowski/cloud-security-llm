@@ -28,7 +28,7 @@ function initSurfaceForm(formId, endpoint, outputId, opts) {
       // de confiança). Isso só acontece quando a própria página pede
       // opts.renderRaw — nenhuma outra rota usa essa opção.
       if (rendered && opts.renderRaw && json[opts.renderRaw] !== undefined) {
-        rendered.innerHTML = json[opts.renderRaw];
+        rendered.textContent = json[opts.renderRaw];
       }
     } catch (err) {
       output.textContent = "Erro de rede: " + err;
